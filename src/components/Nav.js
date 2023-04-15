@@ -67,7 +67,7 @@ export default function Nav(props) {
                   alt="Your Company"
                 />
               </div>
-              <div className="hidden sm:ml-6 sm:block">
+              <div className="hidden sm:ml-6 sm:block w-full">
                 <div className="flex space-x-4">
                   {Object.keys(pages).map((page, index) => {
                     return (
@@ -75,15 +75,26 @@ export default function Nav(props) {
                         key={index}
                         href={pages[page]}
                         className={
-                          (router.pathname == pages[page] ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white") +
+                          (router.pathname == pages[page]
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-300 hover:bg-gray-700 hover:text-white") +
                           " rounded-md px-3 py-2 text-sm font-medium"
                         }
-                        aria-current={router.pathname == pages[page] ? "page" : undefined}
+                        aria-current={
+                          router.pathname == pages[page] ? "page" : undefined
+                        }
                       >
                         {page}
                       </Link>
                     );
                   })}
+                  <div className="flex-auto"></div>
+                  <Link
+                    href="/signout"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  >
+                    Sign Out
+                  </Link>
                 </div>
               </div>
             </div>
@@ -96,23 +107,31 @@ export default function Nav(props) {
           id="mobile-menu"
         >
           <div className="space-y-1 px-2 pb-3 pt-2">
-            {
-              Object.keys(pages).map((page, index) => {
-                return (
-                  <Link
-                    key={index}
-                    href={pages[page]}
-                    className={
-                      (router.pathname == pages[page] ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white") +
-                      " block rounded-md px-3 py-2 text-base font-medium"
-                    }
-                    aria-current={router.pathname == pages[page] ? "page" : undefined}
-                  >
-                    {page}
-                  </Link>
-                );
-              })
-            }
+            {Object.keys(pages).map((page, index) => {
+              return (
+                <Link
+                  key={index}
+                  href={pages[page]}
+                  className={
+                    (router.pathname == pages[page]
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white") +
+                    " block rounded-md px-3 py-2 text-base font-medium"
+                  }
+                  aria-current={
+                    router.pathname == pages[page] ? "page" : undefined
+                  }
+                >
+                  {page}
+                </Link>
+              );
+            })}
+            <Link
+              href="/signout"
+              className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
+            >
+              Sign Out
+            </Link>
           </div>
         </div>
       </nav>
