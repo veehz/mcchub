@@ -1,6 +1,16 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { auth } from "../firebase.js";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function LoginLanding() {
+  const router = useRouter();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  });
+
   return (
     <div>
       <div className="min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -22,15 +32,28 @@ export default function LoginLanding() {
         </div>
 
         <div className="mt-6 mx-auto md:max-w-4xl text-center grid md:grid-flow-col justify-stretch text-3xl font-bold">
-          <Link href="/teacher/login" className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4">
+          <Link
+            href="/login"
+            className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
+          >
             Teacher
           </Link>
-          <Link href="/student/login" className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4">
+          <Link
+            href="/student/login"
+            className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
+          >
             Student
           </Link>
-          <Link href="/parent/login" className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4">
+          <Link
+            href="/login"
+            className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
+          >
             Parent
           </Link>
+        </div>
+        <div className="text-center mt-4 text-red-500">
+          {router?.query?.error == "not-logged-in" &&
+            "You must be logged in to view that page."}
         </div>
       </div>
     </div>
