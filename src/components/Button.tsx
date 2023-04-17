@@ -1,7 +1,17 @@
-export default function Button({ children = "", isLoading = false, props = {}, className = "" }) {
+export default function Button({
+  children = "",
+  isLoading = false,
+  props = {},
+  className = "",
+  flex = true,
+}) {
   return (
     <button
-      className={"group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " + className}
+      className={
+        "group relative w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
+        className +
+        (flex ? " flex" : "")
+      }
       {...props}
     >
       <svg

@@ -13,9 +13,10 @@ interface LoginInput {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      useRouter().push("/dashboard");
+      router.push("/dashboard");
     }
   });
 

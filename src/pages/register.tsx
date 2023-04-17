@@ -2,7 +2,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { auth } from "../firebase.js";
+import { auth, db } from "../firebase.js";
+import { ref, set } from "firebase/database";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -40,6 +41,9 @@ export default function Register() {
     createUserWithEmailAndPassword(auth, data.email, data.password)
       .then((userCredential) => {
         setIsLoading(false);
+        set(ref(db, 'users/' + userCredential.user.uid), {
+          role: data.type,
+        });
         // sendEmailVerification(userCredential.user);
       })
       .catch((error) => {
