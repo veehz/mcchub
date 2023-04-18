@@ -10,15 +10,11 @@ import Button from "@/components/Button";
 export default function Dashboard({ children }) {
   const [user, setUser] = useState<FirebaseUser | null | undefined>(undefined);
   const router = useRouter();
-  onAuthStateChanged(auth, (user) => {
-    setUser(user);
-  });
-
   useEffect(() => {
-    if (user === null) {
-      router.push("/");
-    }
-  }, [user]);
+    onAuthStateChanged(auth, (user) => {
+      if (user) router.push("/dashboard");
+    });
+  }, []);
 
   return (
     <div>

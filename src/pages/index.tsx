@@ -2,14 +2,20 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { auth } from "../firebase.js";
 import { onAuthStateChanged } from "firebase/auth";
+import { useEffect } from "react";
 
 export default function LoginLanding() {
   const router = useRouter();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      router.push("/dashboard");
+  useEffect(() => {
+    if (router?.query?.signout === "true") {
+      auth.signOut();
+      router.push("/");
+    } else {
+      onAuthStateChanged(auth, (user) => {
+        if (user) router.push("/dashboard");
+      });
     }
-  });
+  }, []);
 
   return (
     <div>

@@ -2,10 +2,14 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { auth } from "../firebase.js";
-import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  User as FirebaseUser,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import Button from "@/components/Button";
 import FormLayout from "@/components/FormLayout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface LoginInput {
   email: string;
@@ -14,11 +18,11 @@ interface LoginInput {
 
 export default function LoginPage() {
   const router = useRouter();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      router.push("/dashboard");
-    }
-  });
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) router.push("/dashboard");
+    });
+  }, []);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
