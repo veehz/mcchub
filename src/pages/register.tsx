@@ -40,7 +40,6 @@ export default function Register() {
     setIsLoading(true);
     createUserWithEmailAndPassword(auth, data.email, data.password)
       .then((userCredential) => {
-        setIsLoading(false);
         set(ref(db, 'users/' + userCredential.user.uid), {
           role: data.type,
         });
