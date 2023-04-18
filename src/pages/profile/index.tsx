@@ -12,6 +12,7 @@ import InputList from "@/components/FormComponents/InputList";
 import TextInput from "@/components/FormComponents/TextInput";
 import RadioInput from "@/components/FormComponents/RadioInput";
 import RadioInputList from "@/components/FormComponents/RadioInputList";
+import Link from "next/link";
 
 interface Profile {
   name?: string;
@@ -52,7 +53,7 @@ export default function Profile() {
     setRole("student");
   });
 
-  let originalDetails: Profile = {};
+  const [originalDetails, setOriginalDetails] = useState<Profile>({});
   const onSubmit: SubmitHandler<Profile> = (data) => {
     const updates: {
       [key: string]: string | undefined;
@@ -85,7 +86,7 @@ export default function Profile() {
 
       get(child(ref(db), "users/" + auth.currentUser?.uid))
         .then((snapshot) => {
-          originalDetails = snapshot.val();
+          setOriginalDetails(snapshot.val());
           console.log(snapshot.val());
           for (const key in originalDetails) {
             const x = key as keyof Profile;
@@ -137,11 +138,19 @@ export default function Profile() {
               Your Profile
             </h2>
           </div>
+
           <form
             className="mt-8 space-y-6 w-full"
             onSubmit={handleSubmit(onSubmit)}
             noValidate
           >
+            {originalDetails.nric ? null : (
+              <Link href="/profile/bind-nric">
+                <Button>
+                  Bind your account to an NRIC Number/Passport Number
+                </Button>
+              </Link>
+            )}
             <div className="space-y-2">
               <InputList title="Personal Information">
                 <Input
