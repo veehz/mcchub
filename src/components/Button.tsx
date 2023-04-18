@@ -1,10 +1,17 @@
 export default function Button({
-  children = "",
+  children,
   isLoading = false,
   props = {},
   className = "",
   flex = true,
   disabled = false,
+} : {
+  children?: React.ReactNode;
+  isLoading?: boolean;
+  props?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  className?: string;
+  flex?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
