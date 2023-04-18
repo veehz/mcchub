@@ -103,7 +103,7 @@ export default function Profile() {
           <div className="text-center text-sm">
             {typeof message === "string"
               ? message
-              : message.map((msg) => <p>{msg}</p>)}
+              : message.map((msg, index) => <p key={index}>{msg}</p>)}
           </div>
           <form
             className="space-y-6 w-full"
