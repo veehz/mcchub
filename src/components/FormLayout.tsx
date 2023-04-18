@@ -2,6 +2,10 @@ export default function FormLayout({
   children,
   title = "This is the default title",
   noMaxWidth = false,
+} : {
+  children: React.ReactNode;
+  title?: string;
+  noMaxWidth?: boolean;
 }) {
   return (
     <div>

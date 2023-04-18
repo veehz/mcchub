@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 
 import Button from "@/components/Button";
 
-export default function Dashboard({ children }) {
+export default function Dashboard({ children } : { children: React.ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null | undefined>(undefined);
   const router = useRouter();
   useEffect(() => {

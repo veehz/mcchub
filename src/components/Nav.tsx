@@ -2,9 +2,17 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
-export default function Nav(props) {
+interface Pages {
+  [key: string]: string;
+}
+
+export default function Nav({
+  pages
+}: {
+  pages: Pages;
+  user?: string | null;
+}) {
   const router = useRouter();
-  const pages = props.pages;
 
   const [menuOpen, setMenuOpen] = useState(false);
   return (
