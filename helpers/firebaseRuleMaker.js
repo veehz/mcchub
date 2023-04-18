@@ -85,6 +85,10 @@ const rules = {
       state: { ".validate": "true" },
       country: { ".validate": "true" },
 
+      category: {
+        ".validate": newDataIs(["'junior'", "'intermediate'", "'senior'"]),
+      },
+
       school: { ".validate": "true" },
       nric: {
         ".write": once(),
@@ -162,6 +166,13 @@ const rules = {
         $other: { ".validate": "false" },
       },
     },
+  },
+
+  contestInfo: {
+    ".read": "true",
+    ".write": isRole("admin"),
+
+    registrationDeadline: { ".validate": "newData.isNumber()" },
   },
 
   admin: {
