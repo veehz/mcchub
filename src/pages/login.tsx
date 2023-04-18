@@ -59,7 +59,7 @@ export default function LoginPage() {
   };
 
   return (
-    <FormLayout title="Sign in to your teacher/parent account">
+    <FormLayout title="Sign in to your account">
       <form
         className="mt-8 space-y-6"
         onSubmit={handleSubmit(onSubmit)}

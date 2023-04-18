@@ -32,7 +32,7 @@ export default function LoginLanding() {
           Teacher
         </Link>
         <Link
-          href="/student/login"
+          href="/login"
           className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
         >
           Student
