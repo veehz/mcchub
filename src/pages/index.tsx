@@ -4,6 +4,9 @@ import { auth } from "../firebase.js";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 
+import Image from "next/image";
+import mccLogo from "@/../public/mcc.svg"
+
 export default function LoginLanding() {
   const router = useRouter();
   useEffect(() => {
@@ -22,13 +25,13 @@ export default function LoginLanding() {
       <div className="min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full">
           <div>
-            <img
+            <Image
               className="mx-auto h-12 w-auto"
-              src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-              alt="Your Company"
+              src={mccLogo}
+              alt="MCC Logo"
             />
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-              MCC Registration
+              Registration Site
             </h2>
 
             <h3 className="mt-6 text-center text-xl font-bold tracking-tight text-gray-900">

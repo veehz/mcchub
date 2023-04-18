@@ -1,3 +1,6 @@
+import Image from "next/image";
+import mccLogo from "@/../public/mcc.svg"
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -64,15 +67,15 @@ export default function Nav({
             </div>
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex flex-shrink-0 items-center">
-                <img
+                <Image
                   className="block h-8 w-auto lg:hidden"
-                  src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-                  alt="Your Company"
+                  src={mccLogo}
+                  alt="MCC Logo"
                 />
-                <img
+                <Image
                   className="hidden h-8 w-auto lg:block"
-                  src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-                  alt="Your Company"
+                  src={mccLogo}
+                  alt="MCC Logo"
                 />
               </div>
               <div className="hidden sm:ml-6 sm:block w-full">
