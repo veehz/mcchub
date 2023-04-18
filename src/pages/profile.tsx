@@ -1,13 +1,17 @@
 import Dashboard from "@/components/Dashboard";
 import { useForm, SubmitHandler } from "react-hook-form";
 
+interface Profile {
+  name: string;
+}
+
 export default function Profile() {
   const {
     register,
     formState: { errors },
     handleSubmit,
-  } = useForm();
-  const onSubmit: SubmitHandler = (data) => {
+  } = useForm<Profile>();
+  const onSubmit: SubmitHandler<Profile> = (data) => {
     console.log(data);
   };
 
@@ -27,23 +31,6 @@ export default function Profile() {
           >
             <div className="-space-y-px rounded-md shadow-sm ">
               <div className="w-full">
-                <div className="px-2 py-1">
-                  <label htmlFor="name">Full Name</label>
-                </div>
-                <input
-                  {...register("name", {
-                    required: "Full name is required.",
-                  })}
-                  id="name"
-                  type="text"
-                  className={
-                    "rounded-md relative block w-full border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  }
-                  placeholder="Full Name"
-                />
-              </div>
-
-              <div className="w-full max-w-md">
                 <div className="px-2 py-1">
                   <label htmlFor="name">Full Name</label>
                 </div>
