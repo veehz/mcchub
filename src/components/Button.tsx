@@ -4,6 +4,7 @@ export default function Button({
   props = {},
   className = "",
   flex = true,
+  disabled = false,
 }) {
   return (
     <button
@@ -14,7 +15,7 @@ export default function Button({
         className +
         (flex ? " flex" : "")
       }
-      disabled={isLoading}
+      disabled={isLoading || disabled}
       {...props}
     >
       <svg
