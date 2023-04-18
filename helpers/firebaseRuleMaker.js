@@ -32,6 +32,10 @@ function manager() {
   return `data.child('nric').exists() && root.child('nric/' + data.child('nric').val() + '/manager').val() == auth.uid`;
 }
 
+function getInfo(info, uid = "auth.uid") {
+  return `root.child('users/' + ${uid} + '/${info}').val()`;
+}
+
 function newDataIs(value, data = "newData.val()") {
   return or(...value.map((v) => `${data} == ${v}`));
 }
@@ -112,7 +116,12 @@ const rules = {
       student: {
         ".read": "true",
         ".write": or(
-          and(once(), newDataIs([authUid()]), isRole("student")),
+          and(
+            once(),
+            newDataIs([authUid()]),
+            isRole("student"),
+            `$nric == ${getInfo("nric")}`
+          ),
           isRole("admin")
         ),
       },
