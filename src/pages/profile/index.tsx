@@ -48,11 +48,6 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [role, setRole] = useState<string>("");
 
-  useEffect(() => {
-    setInputLoaded(true);
-    setRole("student");
-  });
-
   const [originalDetails, setOriginalDetails] = useState<Profile>({});
   const onSubmit: SubmitHandler<Profile> = (data) => {
     const updates: {
@@ -72,11 +67,12 @@ export default function Profile() {
   function mySetValue(key: string, value: string | undefined) {
     if (!value) return;
     const x = key as keyof Profile;
+    console.log(x, value);
     setValue(x, value);
   }
 
   const [runOnce, setRunOnce] = useState<boolean>(false);
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       if (runOnce) return;
       setRunOnce(true);
@@ -84,13 +80,17 @@ export default function Profile() {
       if (inputLoaded) return;
       console.log("users/" + auth.currentUser?.uid);
 
-      get(child(ref(db), "users/" + auth.currentUser?.uid))
+      await get(ref(db, "role/" + auth.currentUser?.uid)).then((snapshot) => {
+        setRole(snapshot.val());
+      });
+
+      await get(child(ref(db), "users/" + auth.currentUser?.uid))
         .then((snapshot) => {
           setOriginalDetails(snapshot.val());
           console.log(snapshot.val());
-          for (const key in originalDetails) {
+          for (const key in snapshot.val()) {
             const x = key as keyof Profile;
-            mySetValue(key, originalDetails[x]);
+            mySetValue(key, snapshot.val()[x]);
           }
           setInputLoaded(true);
         })
@@ -144,13 +144,13 @@ export default function Profile() {
             onSubmit={handleSubmit(onSubmit)}
             noValidate
           >
-            {originalDetails.nric ? null : (
+            {Object.keys(originalDetails).length && !originalDetails.nric ? (
               <Link href="/profile/bind-nric">
                 <Button>
                   Bind your account to an NRIC Number/Passport Number
                 </Button>
               </Link>
-            )}
+            ) : null}
             <div className="space-y-2">
               <InputList title="Personal Information">
                 <Input
