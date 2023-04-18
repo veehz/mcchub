@@ -10,7 +10,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="h-screen w-screen bg-gradient-radial from-white via-white to-blue-200">
       <div className="min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full">
           <div>
