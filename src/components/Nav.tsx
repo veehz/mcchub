@@ -1,22 +1,21 @@
 import Image from "next/image";
-import mccWhiteLogo from "@/../public/mccWhite.svg"
+import mccWhiteLogo from "@/../public/mccWhite.svg";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
-interface Pages {
-  [key: string]: string;
-}
-
 export default function Nav({
-  pages
+  pages = [],
+  rightPages = [],
 }: {
-  pages: Pages;
+  pages?: Array<[string, string]>;
+  rightPages?: Array<[string, string]>;
   user?: string | null;
 }) {
   const router = useRouter();
 
+  rightPages.push(["Sign Out", "/?signout=true"]);
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div>
@@ -67,47 +66,62 @@ export default function Nav({
             </div>
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex flex-shrink-0 items-center">
-                <Image
-                  className="block h-8 w-auto lg:hidden"
-                  priority={true}
-                  src={mccWhiteLogo}
-                  alt="MCC Logo"
-                />
-                <Image
-                  className="hidden h-8 w-auto lg:block"
-                  priority={true}
-                  src={mccWhiteLogo}
-                  alt="MCC Logo"
-                />
+                <Link href="/dashboard">
+                  <Image
+                    className="block h-8 w-auto lg:hidden"
+                    priority={true}
+                    src={mccWhiteLogo}
+                    alt="MCC Logo"
+                  />
+                  <Image
+                    className="hidden h-8 w-auto lg:block"
+                    priority={true}
+                    src={mccWhiteLogo}
+                    alt="MCC Logo"
+                  />
+                </Link>
               </div>
               <div className="hidden sm:ml-6 sm:block w-full">
                 <div className="flex space-x-4">
-                  {Object.keys(pages).map((page, index) => {
+                  {pages.map(([pageName, pageLink], index) => {
                     return (
                       <Link
                         key={index}
-                        href={pages[page]}
+                        href={pageLink}
                         className={
-                          (router.pathname == pages[page]
+                          (router.pathname == pageLink
                             ? "bg-gray-900 text-white"
                             : "text-gray-300 hover:bg-gray-700 hover:text-white") +
                           " rounded-md px-3 py-2 text-sm font-medium"
                         }
                         aria-current={
-                          router.pathname == pages[page] ? "page" : undefined
+                          router.pathname == pageLink ? "page" : undefined
                         }
                       >
-                        {page}
+                        {pageName}
                       </Link>
                     );
                   })}
                   <div className="flex-auto"></div>
-                  <Link
-                    href="/?signout=true"
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
-                  >
-                    Sign Out
-                  </Link>
+                  {rightPages.map(([pageName, pageLink], index) => {
+                    return (
+                      <Link
+                        key={index}
+                        href={pageLink}
+                        className={
+                          (router.pathname == pageLink
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-300 hover:bg-gray-700 hover:text-white") +
+                          " rounded-md px-3 py-2 text-sm font-medium"
+                        }
+                        aria-current={
+                          router.pathname == pageLink ? "page" : undefined
+                        }
+                      >
+                        {pageName}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -120,31 +134,25 @@ export default function Nav({
           id="mobile-menu"
         >
           <div className="space-y-1 px-2 pb-3 pt-2">
-            {Object.keys(pages).map((page, index) => {
+            {[...pages, ...rightPages].map(([pageName, pageLink], index) => {
               return (
                 <Link
                   key={index}
-                  href={pages[page]}
+                  href={pageLink}
                   className={
-                    (router.pathname == pages[page]
+                    (router.pathname == pageLink
                       ? "bg-gray-900 text-white"
                       : "text-gray-300 hover:bg-gray-700 hover:text-white") +
                     " block rounded-md px-3 py-2 text-base font-medium"
                   }
                   aria-current={
-                    router.pathname == pages[page] ? "page" : undefined
+                    router.pathname == pageLink ? "page" : undefined
                   }
                 >
-                  {page}
+                  {pageName}
                 </Link>
               );
             })}
-            <Link
-              href="/signout"
-              className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-            >
-              Sign Out
-            </Link>
           </div>
         </div>
       </nav>

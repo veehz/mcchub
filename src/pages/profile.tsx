@@ -11,6 +11,7 @@ export default function Profile() {
     formState: { errors },
     handleSubmit,
   } = useForm<Profile>();
+
   const onSubmit: SubmitHandler<Profile> = (data) => {
     console.log(data);
   };

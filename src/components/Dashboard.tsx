@@ -7,23 +7,26 @@ import { useRouter } from "next/router";
 
 import Button from "@/components/Button";
 
-export default function Dashboard({ children } : { children: React.ReactNode }) {
+export default function Dashboard({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null | undefined>(undefined);
   const router = useRouter();
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      if (user) router.push("/dashboard");
+      if (!user) router.push("/");
     });
   }, [router]);
 
   return (
     <div>
       <Nav
-        pages={{ Dashboard: "/dashboard", Profile: "/profile" }}
+        pages = {[
+          ["Dashboard", "/dashboard"],
+          ["Profile", "/profile"],
+        ]}
         user={user?.email}
       />
       <main className="p-3">
-        { (user && !user.emailVerified) && (
+        {user && !user.emailVerified && (
           <div className="w-full bg-yellow-100 py-4 px-4 rounded-md">
             Your email is not verified. You cannot access your dashboard until
             you are verified.
