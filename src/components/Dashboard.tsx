@@ -21,6 +21,8 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
       <Nav
         pages = {[
           ["Dashboard", "/dashboard"],
+        ]}
+        rightPages={[
           ["Profile", "/profile"],
         ]}
         user={user?.email}

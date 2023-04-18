@@ -15,14 +15,15 @@ export default function Nav({
 }) {
   const router = useRouter();
 
-  rightPages.push(["Sign Out", "/?signout=true"]);
+  if (!rightPages.length || rightPages[rightPages.length - 1][0] != "Sign Out")
+    rightPages.push(["Sign Out", "/?signout=true"]);
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div>
       <nav className="bg-gray-800">
         <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
           <div className="relative flex h-16 items-center justify-between">
-            <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+            <div className="absolute inset-y-0 left-0 flex items-center md:hidden">
               {/* <!-- Mobile menu button--> */}
               <button
                 type="button"
@@ -64,7 +65,7 @@ export default function Nav({
                 </svg>
               </button>
             </div>
-            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+            <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
               <div className="flex flex-shrink-0 items-center">
                 <Link href="/dashboard">
                   <Image
@@ -81,7 +82,7 @@ export default function Nav({
                   />
                 </Link>
               </div>
-              <div className="hidden sm:ml-6 sm:block w-full">
+              <div className="hidden md:ml-6 md:block w-full">
                 <div className="flex space-x-4">
                   {pages.map(([pageName, pageLink], index) => {
                     return (

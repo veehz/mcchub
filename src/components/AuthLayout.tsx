@@ -16,7 +16,7 @@ export default function AuthLayout({
           <div>
             <Link href="/">
               <Image
-                className="mx-auto h-12 w-auto"
+                className="mx-auto h-12 w-auto px-2"
                 priority={true}
                 src={mccLogo}
                 alt="MCC Logo"

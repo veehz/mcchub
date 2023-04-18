@@ -22,26 +22,27 @@ export default function LoginLanding() {
   return (
     <AuthLayout>
       <h3 className="mt-6 text-center text-xl font-bold tracking-tight text-gray-900">
-        I am a...
+        I would like to...
       </h3>
-      <div className="mt-6 mx-auto md:max-w-4xl text-center grid md:grid-flow-col justify-stretch text-3xl font-bold">
+      <div className="mt-6 mx-auto md:max-w-4xl text-center grid md:grid-cols-3 justify-stretch text-3xl font-bold">
         <Link
           href="/login"
-          className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
+          className="flex justify-center p-2 items-center bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
         >
-          Teacher
+          <div>Login</div>
         </Link>
         <Link
-          href="/login"
-          className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
+          href="/register"
+          className="flex justify-center p-2 items-center bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
         >
-          Student
+          Register
         </Link>
         <Link
-          href="/login"
-          className="block p-2 bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
+          href="https://ioimalaysia.org/competition/mcc/"
+          target="_blank"
+          className="flex justify-center p-2 items-center bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
         >
-          Parent
+          Learn about MCC
         </Link>
       </div>
 
