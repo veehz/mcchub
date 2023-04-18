@@ -17,7 +17,7 @@ interface LoginInput {
   email: string;
   password: string;
   confirmPassword: string;
-  type: "teacher" | "parent";
+  type: "teacher" | "parent" | "student";
 }
 
 export default function Register() {
@@ -40,8 +40,19 @@ export default function Register() {
     setIsLoading(true);
     createUserWithEmailAndPassword(auth, data.email, data.password)
       .then((userCredential) => {
-        set(ref(db, 'users/' + userCredential.user.uid), {
-          role: data.type,
+        set(ref(db, "role/" + userCredential.user.uid), data.type).then(() => {
+          console.log("Role set!")
+        })
+        .catch((error) => {
+          console.log("Role set error!", error)
+        });
+        set(ref(db, "users/" + userCredential.user.uid), {
+          email: data.email,
+        }).then(() => {
+          console.log("Email set!")
+        })
+        .catch((error) => {
+          console.log("Email set error!", error)
         });
         // sendEmailVerification(userCredential.user);
       })
@@ -67,7 +78,7 @@ export default function Register() {
   };
 
   return (
-    <FormLayout title="Register for a teacher/parent account">
+    <FormLayout title="Register for an account">
       <form
         className="mt-8 space-y-6"
         onSubmit={handleSubmit(onSubmit)}
@@ -155,7 +166,7 @@ export default function Register() {
               type="radio"
               id="teacher"
               {...register("type", {
-                required: "Please select if you are a teacher or parent.",
+                required: "Please select your role.",
               })}
               value="teacher"
             />
@@ -166,11 +177,22 @@ export default function Register() {
               type="radio"
               id="parent"
               {...register("type", {
-                required: "Please select if you are a teacher or parent.",
+                required: "Please select your role.",
               })}
               value="parent"
             />
             <label htmlFor="parent">I am a Parent</label>
+          </div>
+          <div className="space-x-2 px-2 pb-2 text-sm font-bold">
+            <input
+              type="radio"
+              id="student"
+              {...register("type", {
+                required: "Please select if you are a teacher or student.",
+              })}
+              value="student"
+            />
+            <label htmlFor="student">I am a Student</label>
           </div>
         </div>
 
@@ -186,14 +208,6 @@ export default function Register() {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="text-sm">
-            <Link
-              href="/"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Not a teacher?
-            </Link>
-          </div>
           <div className="text-sm">
             <Link
               href="./login"
