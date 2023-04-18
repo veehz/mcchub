@@ -111,13 +111,15 @@ export default function Profile() {
             noValidate
           >
             <div className="space-y-2">
-              <TextInput
-                hook={register("nric")}
-                id="nric"
-                inputName="NRIC/Passport Number"
-                placeholder="NRIC/Passport Number (e.g. 031231-14-1234)"
-                disabled={!allowInput}
-              />
+              {
+                TextInput({
+                  hook: register("nric"),
+                  id: "nric",
+                  inputName: "NRIC/Passport Number",
+                  placeholder: "NRIC/Passport Number (e.g. 031231-14-1234)",
+                  disabled: !allowInput
+                })
+              }
 
               <Button
                 props={{ type: "submit" }}

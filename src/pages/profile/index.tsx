@@ -153,14 +153,14 @@ export default function Profile() {
             ) : null}
             <div className="space-y-2">
               <InputList title="Personal Information">
-                <Input
-                  hook={register("name", {
+                {Input({
+                  hook: register("name", {
                     required: "Full name is required.",
-                  })}
-                  id="name"
-                  placeholder="Full Name"
-                  errorMsg={errors?.name?.message}
-                />
+                  }),
+                  id: "name",
+                  placeholder: "Full Name",
+                  errorMsg: errors?.name?.message,
+                })}
 
                 <RadioInputList
                   title="Gender"
@@ -191,47 +191,45 @@ export default function Profile() {
               </InputList>
 
               <InputList title="Student Information" hidden={role != "student"}>
-                <Input
-                  hook={register("school")}
-                  id="school"
-                  inputName="School"
-                  placeholder="School"
-                  errorMsg={errors?.school?.message}
-                />
-                <Input
-                  hook={register("form", {
+                {Input({
+                  hook: register("school"),
+                  id: "school",
+                  placeholder: "School",
+                  errorMsg: errors?.school?.message,
+                })}
+                {Input({
+                  hook: register("form", {
                     validate: (value) => {
                       if (role != "student") return true;
                       if (!value || value.length < 1)
                         return "Please fill in your form/year.";
                     },
-                  })}
-                  id="name"
-                  inputName="Form/Year"
-                  placeholder="Form/Year (e.g. Form 4, Standard 6)"
-                  errorMsg={errors?.form?.message}
-                />
-                <Input
-                  hook={register("state")}
-                  id="state"
-                  inputName="State"
-                  placeholder="State (e.g. Kuala Lumpur)"
-                  errorMsg={errors?.state?.message}
-                />
-                <Input
-                  hook={register("country", {
+                  }),
+                  id: "name",
+                  inputName: "Form/Year",
+                  placeholder: "Form/Year (e.g. Form 4, Standard 6)",
+                  errorMsg: errors?.form?.message,
+                })}
+                {Input({
+                  hook: register("state"),
+                  id: "state",
+                  inputName: "State",
+                  placeholder: "State (e.g. Kuala Lumpur)",
+                  errorMsg: errors?.state?.message,
+                })}
+                {Input({
+                  hook: register("country", {
                     validate: (value) => {
                       if (role != "student") return true;
                       if (!value || value.length < 1)
                         return "Please fill in your country.";
                     },
-                  })}
-                  id="country"
-                  inputName="Country"
-                  placeholder="Country (e.g. Malaysia)"
-                  errorMsg={errors?.country?.message}
-                />
-
+                  }),
+                  id: "country",
+                  inputName: "Country",
+                  placeholder: "Country (e.g. Malaysia)",
+                  errorMsg: errors?.country?.message,
+                })}
                 <RadioInputList
                   title="Category"
                   errorMsg={errors?.category?.message}
@@ -274,42 +272,41 @@ export default function Profile() {
                 <div className="text-sm text-center">
                   This will be written on your receipt.
                 </div>
-                <Input
-                  hook={register("billingMobileNumber")}
-                  id="billingMobileNumber"
-                  placeholder="Mobile Number"
-                />
-
-                <Input
-                  hook={register("billingAddressLine1")}
-                  id="billingAddressLine1"
-                  placeholder="Address Line 1"
-                />
-                <Input
-                  hook={register("billingAddressLine2")}
-                  id="billingAddressLine2"
-                  placeholder="Address Line 2"
-                />
-                <Input
-                  hook={register("billingAddressPostcode")}
-                  id="billingAddressPostcode"
-                  placeholder="Postcode"
-                />
-                <Input
-                  hook={register("billingAddressCity")}
-                  id="billingAddressCity"
-                  placeholder="City"
-                />
-                <Input
-                  hook={register("billingAddressState")}
-                  id="billingAddressState"
-                  placeholder="State"
-                />
-                <Input
-                  hook={register("billingAddressCountry")}
-                  id="billingAddressCountry"
-                  placeholder="Country"
-                />
+                {Input({
+                  hook: register("billingMobileNumber"),
+                  id: "billingMobileNumber",
+                  placeholder: "Mobile Number",
+                })}
+                {Input({
+                  hook: register("billingAddressLine1"),
+                  id: "billingAddressLine1",
+                  placeholder: "Address Line 1",
+                })}
+                {Input({
+                  hook: register("billingAddressLine2"),
+                  id: "billingAddressLine2",
+                  placeholder: "Address Line 2",
+                })}
+                {Input({
+                  hook: register("billingAddressPostcode"),
+                  id: "billingAddressPostcode",
+                  placeholder: "Postcode",
+                })}
+                {Input({
+                  hook: register("billingAddressCity"),
+                  id: "billingAddressCity",
+                  placeholder: "City",
+                })}
+                {Input({
+                  hook: register("billingAddressState"),
+                  id: "billingAddressState",
+                  placeholder: "State",
+                })}
+                {Input({
+                  hook: register("billingAddressCountry"),
+                  id: "billingAddressCountry",
+                  placeholder: "Country",
+                })}
               </InputList>
 
               <Button props={{ type: "submit" }} isLoading={isLoading}>
