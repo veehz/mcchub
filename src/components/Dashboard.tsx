@@ -14,7 +14,7 @@ export default function Dashboard({ children } : { children: React.ReactNode }) 
     onAuthStateChanged(auth, (user) => {
       if (user) router.push("/dashboard");
     });
-  }, []);
+  }, [router]);
 
   return (
     <div>

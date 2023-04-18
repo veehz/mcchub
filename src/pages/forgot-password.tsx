@@ -18,7 +18,7 @@ export default function ForgotPassword() {
     onAuthStateChanged(auth, (user) => {
       if (user) router.push("/dashboard");
     });
-  }, []);
+  }, [router]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");

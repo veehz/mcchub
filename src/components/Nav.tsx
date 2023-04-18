@@ -1,5 +1,5 @@
 import Image from "next/image";
-import mccLogo from "@/../public/mcc.svg"
+import mccWhiteLogo from "@/../public/mccWhite.svg"
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -69,12 +69,14 @@ export default function Nav({
               <div className="flex flex-shrink-0 items-center">
                 <Image
                   className="block h-8 w-auto lg:hidden"
-                  src={mccLogo}
+                  priority={true}
+                  src={mccWhiteLogo}
                   alt="MCC Logo"
                 />
                 <Image
                   className="hidden h-8 w-auto lg:block"
-                  src={mccLogo}
+                  priority={true}
+                  src={mccWhiteLogo}
                   alt="MCC Logo"
                 />
               </div>
