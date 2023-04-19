@@ -74,14 +74,6 @@ const rules = {
         ".validate": newDataIs(["'male'", "'female'", "'undisclosed'"]),
       },
 
-      /*
-      1. Malaysian living in Malaysia (m-m)
-      2. Malaysian living abroad (m-f)
-      3. Foreigner living in Malaysia (f-m) */
-      livingStatus: {
-        ".validate": newDataIs(["'m-m'", "'m-f'", "'f-m'"]),
-      },
-
       state: { ".validate": "true" },
       country: { ".validate": "true" },
 
@@ -90,9 +82,13 @@ const rules = {
       },
 
       school: { ".validate": "true" },
-      nric: {
-        ".write": once(),
-      },
+
+      nationality: { ".write": once() },
+      nric: { ".write": and(once(), `data.parent().child('nationality').exists()`, or(
+        and(`data.parent().child('nationality').val() == 'Malaysian'`, `data.val().matches(/[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/)`),
+        `data.parent().child('nationality').val() != 'Malaysian'`
+      )) },
+
       $other: { ".validate": "false" },
     },
   },
