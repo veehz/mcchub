@@ -75,7 +75,7 @@ export default function App() {
           return;
         } else {
           try {
-            await set(ref(db, "managedStudents/" + auth!.currentUser!.uid + "/" + identification), "true");
+            await set(ref(db, "managedStudents/" + auth!.currentUser!.uid + "/" + identification), true);
             await set(
               ref(db, "nric/" + identification + "/manager"),
               auth!.currentUser!.uid

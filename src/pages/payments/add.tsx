@@ -78,7 +78,7 @@ export default function App() {
                   db,
                   `admin/payments/pending/${auth.currentUser!.uid}-${paymentId}`
                 ),
-                "true"
+                true
               );
 
               setMessage(
