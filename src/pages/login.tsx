@@ -36,6 +36,7 @@ export default function LoginPage() {
     setIsLoading(true);
     signInWithEmailAndPassword(auth, data.email, data.password)
       .catch((error) => {
+        setIsLoading(false);
         const errorCode = error.code;
         const errorMessage = error.message;
         switch (errorCode) {
