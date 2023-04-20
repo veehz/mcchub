@@ -46,7 +46,7 @@ const StudentCard = ({
         onlyOnce: true,
       }
     );
-  }, [fetchStatus]);
+  }, [fetchStatus, nric]);
   return (
     <div className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4"}>
       <div className="font-bold text-xl mb-2">{nric.split("-").join(" - ")}</div>
