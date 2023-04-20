@@ -87,23 +87,29 @@ export default function Profile() {
           return;
         } else {
           setSubmitted(true);
-          await set(
-            ref(db, "users/" + auth.currentUser?.uid + "/nationality"),
-            isMalaysian === "true" ? "Malaysian" : nat
-          );
-          await set(
-            ref(db, "users/" + auth.currentUser?.uid + "/nric"),
-            identification
-          );
-          await set(
-            ref(db, "nric/" + identification + "/student"),
-            auth.currentUser?.uid
-          );
+          try {
+            await set(
+              ref(db, "users/" + auth.currentUser?.uid + "/nationality"),
+              isMalaysian === "true" ? "Malaysian" : nat
+            );
+            await set(
+              ref(db, "users/" + auth.currentUser?.uid + "/nric"),
+              identification
+            );
+            await set(
+              ref(db, "nric/" + identification + "/student"),
+              auth.currentUser?.uid
+            );
+            setMessage("NRIC/Passport is successfully bound.");
+            setIsLoading(false);
 
-          setMessage("NRIC/Passport is successfully bound.");
-          setIsLoading(false);
-
-          setAllowInput(false);
+            setAllowInput(false);
+          } catch (e) {
+            setMessage("An error occured. Please try again later.");
+            setIsLoading(false);
+            setAllowInput(true);
+            return;
+          }
         }
       }
     );
@@ -199,33 +205,45 @@ export default function Profile() {
             noValidate
           >
             <div className="space-y-2">
-              {isMalaysian === "false"
-                ? <div className="w-full">
-                <div className="px-2 py-1">
-                  <label>Nationality</label>
-                </div>
-                <select
-                  className={
-                    "rounded-md relative block w-full border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" +
-                    " disabled:opacity-75 disabled:bg-slate-100"
-                  }
-                  disabled={false}
-                  id="nationality"
-                  defaultValue={"select-one"}
-                >
-                  <option value="select-one" disabled>Select your nationality</option>
-                    {
-                        nationalities.filter(nat => nat != "Malaysian").map((nat, index) => {
-                            return <option key={index} value={nat} {...register("nationality", {
-                              validate: {
-                                notEmpty: value => value != "select-one" || "Please select your nationality"
-                              }
-                            })}>{nat}</option>
-                        })
+              {isMalaysian === "false" ? (
+                <div className="w-full">
+                  <div className="px-2 py-1">
+                    <label>Nationality</label>
+                  </div>
+                  <select
+                    className={
+                      "rounded-md relative block w-full border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" +
+                      " disabled:opacity-75 disabled:bg-slate-100"
                     }
-                </select>
-              </div>
-                : null}
+                    disabled={false}
+                    id="nationality"
+                    defaultValue={"select-one"}
+                  >
+                    <option value="select-one" disabled>
+                      Select your nationality
+                    </option>
+                    {nationalities
+                      .filter((nat) => nat != "Malaysian")
+                      .map((nat, index) => {
+                        return (
+                          <option
+                            key={index}
+                            value={nat}
+                            {...register("nationality", {
+                              validate: {
+                                notEmpty: (value) =>
+                                  value != "select-one" ||
+                                  "Please select your nationality",
+                              },
+                            })}
+                          >
+                            {nat}
+                          </option>
+                        );
+                      })}
+                  </select>
+                </div>
+              ) : null}
               {isMalaysian === "true"
                 ? TextInput({
                     hook: register("nric", {
