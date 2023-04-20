@@ -133,7 +133,7 @@ export default function Nav({
 
         {/* <!-- Mobile menu, show/hide based on menu state. --> */}
         <div
-          className={"sm:hidden" + (menuOpen ? "" : " hidden")}
+          className={"md:hidden" + (menuOpen ? "" : " hidden")}
           id="mobile-menu"
         >
           <div className="space-y-1 px-2 pb-3 pt-2">
