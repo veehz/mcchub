@@ -58,33 +58,42 @@ export default function App() {
         uploadBytes(storage, proof)
           .then(() => {
             console.log("Uploaded");
-            set(
-              ref(db, `payments/${auth.currentUser!.uid}/${paymentId}/amount`),
-              amount
-            )
-              .then(() => {
-                console.log("Amount set");
-                setMessage("Payment uploaded successfully!");
-                setAllowInput(true);
-                setIsLoading(false);
-              })
-              .catch((err) => {
-                console.log(err);
-                setMessage(
-                  "Error uploading data. Please try again. If the problem persists, please contact us."
-                );
-                setAllowInput(true);
-                setIsLoading(false);
-              });
-            set(
-              ref(
-                db,
-                `payments/${auth.currentUser!.uid}/${paymentId}/fileExtension`
-              ),
-              fileExtension
-            ).catch((err) => {
+            try {
+              set(
+                ref(
+                  db,
+                  `payments/${auth.currentUser!.uid}/${paymentId}/amount`
+                ),
+                amount
+              );
+              set(
+                ref(
+                  db,
+                  `payments/${auth.currentUser!.uid}/${paymentId}/fileExtension`
+                ),
+                fileExtension
+              );
+              set(
+                ref(
+                  db,
+                  `admin/payments/pending/${auth.currentUser!.uid}-${paymentId}`
+                ),
+                "true"
+              );
+
+              setMessage(
+                "Payment has been successfully uploaded. Please wait for approval."
+              );
+              setIsLoading(false);
+            } catch (err) {
               console.log(err);
-            });
+
+              setMessage(
+                "There was an error processing your payment. Please contact us if problem persists."
+              );
+              setAllowInput(true);
+              setIsLoading(false);
+            }
           })
           .catch((err) => {
             console.log(err);
