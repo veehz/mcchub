@@ -1,11 +1,11 @@
 /* eslint-disable */
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { ProfilerProps, useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
-import { ref, get, set, child, update } from "firebase/database";
+import { ref, child, update, onValue } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 
 import InputList from "@/components/FormComponents/InputList";
@@ -44,12 +44,16 @@ export default function Profile() {
     setValue,
   } = useForm<Profile>();
 
-  const [inputLoaded, setInputLoaded] = useState<boolean>(false);
+  const [allowInput, setAllowInput] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [role, setRole] = useState<string>("");
 
+  const [message, setMessage] = useState<string>("");
+
   const [originalDetails, setOriginalDetails] = useState<Profile>({});
   const onSubmit: SubmitHandler<Profile> = (data) => {
+    setIsLoading(true);
+    setAllowInput(false);
     const updates: {
       [key: string]: string | undefined;
     } = {};
@@ -61,7 +65,16 @@ export default function Profile() {
         updates[key as string] = data[x] ? data[x] : "";
       }
     }
-    update(child(ref(db), "users/" + auth.currentUser?.uid), updates);
+    update(child(ref(db), "users/" + auth.currentUser?.uid), updates).then(() => {
+      setIsLoading(false);
+      setAllowInput(true);
+      setMessage("Profile updated successfully.");
+    }).catch((err) => {
+      console.log(err);
+      setIsLoading(false);
+      setAllowInput(true);
+      setMessage("An error occurred. Please try again later.");
+    });
   };
 
   function mySetValue(key: string, value: string | undefined) {
@@ -77,26 +90,31 @@ export default function Profile() {
       if (runOnce) return;
       setRunOnce(true);
 
-      if (inputLoaded) return;
-      console.log("users/" + auth.currentUser?.uid);
+      onValue(
+        ref(db, "role/" + auth.currentUser?.uid),
+        (snapshot) => {
+          setRole(snapshot.val());
+        },
+        {
+          onlyOnce: true,
+        }
+      );
 
-      await get(ref(db, "role/" + auth.currentUser?.uid)).then((snapshot) => {
-        setRole(snapshot.val());
-      });
-
-      await get(child(ref(db), "users/" + auth.currentUser?.uid))
-        .then((snapshot) => {
+      onValue(
+        child(ref(db), "users/" + auth.currentUser?.uid),
+        (snapshot) => {
           setOriginalDetails(snapshot.val());
           console.log(snapshot.val());
           for (const key in snapshot.val()) {
             const x = key as keyof Profile;
             mySetValue(key, snapshot.val()[x]);
           }
-          setInputLoaded(true);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+          setAllowInput(true);
+        },
+        {
+          onlyOnce: true,
+        }
+      );
     }
   });
 
@@ -121,7 +139,7 @@ export default function Profile() {
         id={id}
         inputName={inputName}
         placeholder={placeholder}
-        disabled={!inputLoaded}
+        disabled={!allowInput}
         errorMsg={errorMsg}
       >
         {children}
@@ -137,6 +155,10 @@ export default function Profile() {
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
               Your Profile
             </h2>
+          </div>
+
+          <div>
+            {message}
           </div>
 
           <form
@@ -169,21 +191,21 @@ export default function Profile() {
                   <RadioInput
                     id="male"
                     hook={register("gender")}
-                    disabled={!inputLoaded}
+                    disabled={!allowInput}
                   >
                     I am a Male
                   </RadioInput>
                   <RadioInput
                     id="female"
                     hook={register("gender")}
-                    disabled={!inputLoaded}
+                    disabled={!allowInput}
                   >
                     I am a Female
                   </RadioInput>
                   <RadioInput
                     id="undisclosed"
                     hook={register("gender")}
-                    disabled={!inputLoaded}
+                    disabled={!allowInput}
                   >
                     I am non-binary/I do not wish to disclose my gender
                   </RadioInput>
@@ -243,21 +265,21 @@ export default function Profile() {
                           return "Please select a category.";
                       },
                     })}
-                    disabled={!inputLoaded}
+                    disabled={!allowInput}
                   >
                     Bongsu/Junior - Form 1, 2, 3, or Primary School
                   </RadioInput>
                   <RadioInput
                     id="intermediate"
                     hook={register("category")}
-                    disabled={!inputLoaded}
+                    disabled={!allowInput}
                   >
                     Muda/Intermediate - Form 4, 5
                   </RadioInput>
                   <RadioInput
                     id="senior"
                     hook={register("category")}
-                    disabled={!inputLoaded}
+                    disabled={!allowInput}
                   >
                     Sulung/Senior - Form 6 (lower & upper), Pre-U
                     (Matriculation, Foundation Studies, IB, A-Levels, etc.)

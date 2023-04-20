@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
-import { ref, get, set, child } from "firebase/database";
+import { ref, set, onValue } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 
 import TextInput from "@/components/FormComponents/TextInput";
@@ -74,29 +74,37 @@ export default function Profile() {
 
     const identification = isMalaysian === "true" ? nric : passport;
 
-    const NRICData = await get(
-      child(ref(db), "nric/" + identification + "/student")
+    onValue(
+      ref(db, "nric/" + identification + "/student"),
+      async (snapshot) => {
+        if (snapshot.val()) {
+          setMessage(
+            "NRIC/Passport is already taken. Please contact us if this is a mistake."
+          );
+          setIsLoading(false);
+          return;
+        } else {
+          setSubmitted(true);
+          await set(
+            ref(db, "users/" + auth.currentUser?.uid + "/nationality"),
+            isMalaysian === "true" ? "Malaysian" : nat
+          );
+          await set(
+            ref(db, "users/" + auth.currentUser?.uid + "/nric"),
+            identification
+          );
+          await set(
+            ref(db, "nric/" + identification + "/student"),
+            auth.currentUser?.uid
+          );
+
+          setMessage("NRIC/Passport is successfully bound.");
+          setIsLoading(false);
+
+          setAllowInput(false);
+        }
+      }
     );
-    if (NRICData.val()) {
-      setMessage(
-        "NRIC/Passport is already taken. Please contact us if this is a mistake."
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    setSubmitted(true);
-    await set(
-      ref(db, "users/" + auth.currentUser?.uid + "/nationality"),
-      isMalaysian === "true" ? "Malaysian" : nat
-    );
-    await set(ref(db, "users/" + auth.currentUser?.uid + "/nric"), identification);
-    await set(ref(db, "nric/" + identification + "/student"), auth.currentUser?.uid);
-
-    setMessage("NRIC/Passport is successfully bound.");
-    setIsLoading(false);
-
-    setAllowInput(false);
   };
 
   onAuthStateChanged(auth, async (user) => {
@@ -104,35 +112,52 @@ export default function Profile() {
     if (user) {
       if (inputLoaded) return;
       setInputLoaded(true);
-      const nric = (await get(ref(db, "users/" + user.uid + "/nric"))).val();
 
-      if (nric) {
-        const userIsMalaysian = (await get(ref(db, "users/" + user.uid + "/nationality"))).val() === "Malaysian";
-        setValue("isMalaysian", userIsMalaysian ? "true" : "false");
-        if (userIsMalaysian) setValue("nric", nric);
-        else setValue("passport", nric);
-        setMessage([
-          "An indentification is already bound to your account.",
-          "If you want to change your identification, please contact us.",
-        ]);
-        return;
-      }
-
-      const role = await get(ref(db, "role/" + user.uid));
-      if (role.val() === "student") {
-        setAllowInput(true);
-        setMessage([
-          "You can bind your identification only once.",
-          "Please check before submitting.",
-        ]);
-      } else {
-        setMessage([
-          "You are not a student. You don't have to bind your IC number.",
-          "Please contact us if this is a mistake.",
-        ]);
-      }
+      onValue(
+        ref(db, "users/" + user.uid + "/nric"),
+        (snapshot) => {
+          const nric = snapshot.val();
+          if (nric) {
+            onValue(
+              ref(db, "users/" + user.uid + "/nationality"),
+              (snapshot) => {
+                const userIsMalaysian = snapshot.val() === "Malaysian";
+                setValue("isMalaysian", userIsMalaysian ? "true" : "false");
+                if (userIsMalaysian) setValue("nric", nric);
+                else setValue("passport", nric);
+                setMessage([
+                  "An indentification is already bound to your account.",
+                  "If you want to change your identification, please contact us.",
+                ]);
+              },
+              {
+                onlyOnce: true,
+              }
+            );
+          } else {
+            onValue(ref(db, "role/" + user.uid), (snapshot) => {
+              if (snapshot.val() === "student") {
+                setAllowInput(true);
+                setMessage([
+                  "You can bind your identification only once.",
+                  "Please check before submitting.",
+                ]);
+              } else {
+                setMessage([
+                  "You are not a student. You don't have to bind your IC number.",
+                  "Please contact us if this is a mistake.",
+                ]);
+              }
+            });
+          }
+        },
+        {
+          onlyOnce: true,
+        }
+      );
     }
   });
+
   return (
     <Dashboard>
       <div className="flex min-h-full items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -185,15 +210,16 @@ export default function Profile() {
                 ? TextInput({
                     hook: register("nric", {
                       pattern: {
-                        value: /[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/,
+                        value:
+                          /[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/,
                         message: "Invalid NRIC format.",
-                      }
+                      },
                     }),
                     id: "nric",
                     inputName: "NRIC",
                     placeholder: "NRIC with dashes (e.g. 031231-14-1234)",
                     disabled: !allowInput,
-                    errorMsg: errors?.nric?.message
+                    errorMsg: errors?.nric?.message,
                   })
                 : null}
               {isMalaysian === "false"
