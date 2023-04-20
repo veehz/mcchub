@@ -1,0 +1,219 @@
+import Button from "@/components/Button";
+import Dashboard from "@/components/Dashboard";
+import { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+
+import TextInput from "@/components/FormComponents/TextInput";
+import { onValue, ref, set } from "firebase/database";
+import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
+import { auth, db } from "@/firebase";
+
+interface PaymentInput {
+  amount: string;
+  proof: FileList | null;
+}
+
+export default function App() {
+  const [message, setMessage] = useState<string | string[]>([
+    "Payment to bank:",
+    "My Bank",
+    "0000000",
+    "Fees: RM15/contestant",
+  ]);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [allowInput, setAllowInput] = useState<boolean>(true);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+  } = useForm<PaymentInput>();
+
+  const file = watch("proof");
+
+  const onSubmit: SubmitHandler<PaymentInput> = async (data) => {
+    setIsLoading(true);
+    setAllowInput(false);
+
+    const amount = data.amount ? data.amount.trim() : "";
+    const proof = data.proof ? data.proof[0] : null;
+
+    if (proof == null) return;
+
+    onValue(
+      ref(db, `payments/${auth.currentUser!.uid}`),
+      (snapshot) => {
+        const paymentId = snapshot.exists()
+          ? Object.keys(snapshot.val()).length + 1 + 10000
+          : 10001;
+        const fileExtension = proof.name.split(".").pop();
+
+        const storage = storageRef(
+          getStorage(),
+          `paymentProof/${auth.currentUser!.uid}/${paymentId}.${fileExtension}`
+        );
+        uploadBytes(storage, proof)
+          .then(() => {
+            console.log("Uploaded");
+            set(
+              ref(db, `payments/${auth.currentUser!.uid}/${paymentId}/amount`),
+              amount
+            )
+              .then(() => {
+                console.log("Amount set");
+                setMessage("Payment uploaded successfully!");
+                setAllowInput(true);
+                setIsLoading(false);
+              })
+              .catch((err) => {
+                console.log(err);
+                setMessage(
+                  "Error uploading data. Please try again. If the problem persists, please contact us."
+                );
+                setAllowInput(true);
+                setIsLoading(false);
+              });
+            set(
+              ref(
+                db,
+                `payments/${auth.currentUser!.uid}/${paymentId}/fileExtension`
+              ),
+              fileExtension
+            ).catch((err) => {
+              console.log(err);
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+            setMessage(
+              "Error uploading file. Please try again. If the problem persists, please contact us."
+            );
+            setAllowInput(true);
+            setIsLoading(false);
+          });
+      },
+      {
+        onlyOnce: true,
+      }
+    );
+  };
+
+  return (
+    <Dashboard>
+      <div className="flex min-h-full items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="w-full space-y-8 max-w-md">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+              Add Payment
+            </h2>
+          </div>
+          <div className="text-center text-sm">
+            {typeof message === "string"
+              ? message
+              : message.map((msg, index) => <p key={index}>{msg}</p>)}
+          </div>
+          <form
+            className="space-y-6 w-full"
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+          >
+            <div className="space-y-6">
+              <div>
+                {TextInput({
+                  inputName: "Amount",
+                  placeholder: "10",
+                  hook: register("amount", {
+                    required: "Amount is required",
+                    pattern: {
+                      value: /^[0-9]+.?[0-9]{0,2}$/,
+                      message: "Amount must be a number",
+                    },
+                    min: {
+                      value: 1,
+                      message: "Amount must be at least 1",
+                    },
+                  }),
+                  errorMsg: errors.amount?.message,
+                })}
+
+                <div className="col-span-full">
+                  <label htmlFor="cover-photo" className="px-2 py-1">
+                    Payment Proof
+                  </label>
+                  <div className="px-2 text-sm">{errors.proof?.message}</div>
+                  {file ? (
+                    <div className="px-2 text-sm">
+                      Uploaded: {file[0].name}.{" "}
+                      <div
+                        className="inline-block font-semibold text-indigo-600 hover:text-indigo-500 hover:cursor-pointer"
+                        onClick={() => setValue("proof", null)}
+                      >
+                        Remove
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                      <div className="text-center">
+                        <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                          <label
+                            htmlFor="proof"
+                            className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                          >
+                            <span>Upload a file</span>
+                            <input
+                              id="proof"
+                              type="file"
+                              className="sr-only"
+                              {...register("proof", {
+                                required: "Payment proof is required",
+                                validate: {
+                                  lessThan3MB: (fileList) => {
+                                    console.log(fileList);
+                                    return (
+                                      (fileList &&
+                                        fileList[0].size < 3000000) ||
+                                      "File must be less than 3MB"
+                                    );
+                                  },
+                                  acceptedFormats: (fileList) =>
+                                    (fileList &&
+                                      [
+                                        "image/png",
+                                        "image/jpeg",
+                                        "application/pdf",
+                                      ].includes(fileList[0].type)) ||
+                                    "Unsupported Format",
+                                  onlyOneFile: (fileList) =>
+                                    (fileList && fileList.length === 1) ||
+                                    "Only one file is allowed",
+                                },
+                              })}
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs leading-5 text-gray-600">
+                          PNG, JPG, PDF up to 3MB
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <Button
+              props={{ type: "submit" }}
+              isLoading={isLoading}
+              disabled={!allowInput}
+            >
+              Submit Payment
+            </Button>
+          </form>
+        </div>
+      </div>
+    </Dashboard>
+  );
+}

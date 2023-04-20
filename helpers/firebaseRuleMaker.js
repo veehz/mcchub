@@ -84,10 +84,19 @@ const rules = {
       school: { ".validate": "true" },
 
       nationality: { ".write": once() },
-      nric: { ".write": and(once(), `data.parent().child('nationality').exists()`, or(
-        and(`data.parent().child('nationality').val() == 'Malaysian'`, `data.val().matches(/[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/)`),
-        `data.parent().child('nationality').val() != 'Malaysian'`
-      )) },
+      nric: {
+        ".write": and(
+          once(),
+          `data.parent().child('nationality').exists()`,
+          or(
+            and(
+              `data.parent().child('nationality').val() == 'Malaysian'`,
+              `data.val().matches(/[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/)`
+            ),
+            `data.parent().child('nationality').val() != 'Malaysian'`
+          )
+        ),
+      },
 
       $other: { ".validate": "false" },
     },
@@ -149,16 +158,35 @@ const rules = {
     },
   },
 
-  payment: {
+  payments: {
     $userId: {
+      ".read": "true",
       $paymentId: {
         // managers can create, can read, cannot edit
-        ".read": or(self(), isRole("admin")),
-        ".write": or(and(self(), once()), isRole("admin")),
-        path: { ".validate": "newData.isString()" },
-        approved: { ".validate": "newData.isBoolean()" },
-        approvedBy: { ".validate": "newData.isString()" },
-        amount: { ".validate": "newData.isNumber()" },
+        ".write": or(self(), isRole("admin")),
+        amount: {
+          ".write": or(once(), isRole("admin")),
+          ".validate": "newData.isString()",
+        },
+        fileExtension: {
+          ".write": or(once(), isRole("admin")),
+          ".validate": "newData.isString()",
+        },
+
+        approved: {
+          ".write": or(and(once(), newDataIs(["'pending'"])), isRole("admin")),
+          ".validate": and(
+            "newData.isString()",
+            newDataIs(["'approved'", "'pending'", "'rejected'"])
+          ),
+        },
+        approvedBy: {
+          ".write": or(
+            and(once(), newDataIs(["''"])),
+            and(isRole("admin"), newDataIs(["auth.uid"]))
+          ),
+          ".validate": "newData.isString()",
+        },
         $other: { ".validate": "false" },
       },
     },
@@ -175,9 +203,10 @@ const rules = {
     // admin can read
     // admin can write in individual spaces
     ".read": isRole("admin"),
-    paymentId: {
+    payments: {
       pending: {
         // manager can create here
+        // userid-paymentid
         $paymentId: {
           ".write": or(and(once(), isManager()), isRole("admin")),
           ".validate": "newData.isString()",
