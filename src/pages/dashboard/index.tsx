@@ -38,10 +38,19 @@ const PartCard = ({
   color?: string;
   splitInto: number;
 }) => {
+  const widthClass = {
+    1: "w-full",
+    2: "w-1/2",
+    3: "w-1/3",
+  }[splitInto];
+  const colorClass = {
+    red: "bg-red-100",
+    green: "bg-green-100",
+    yellow: "bg-yellow-100",
+    none: "",
+  }[color || "none"];
   return (
-    <div
-      className={`w-1/${splitInto} ${color ? `bg-${color}-100 ` : ``}px-4 py-6`}
-    >
+    <div className={`${widthClass} ${colorClass} px-4 py-6`}>
       <div className="font-bold">{title}</div>
       {children}
     </div>
