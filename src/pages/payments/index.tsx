@@ -9,7 +9,7 @@ import {
   ref as storageRef,
 } from "firebase/storage";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const PaymentCard = ({
   paymentId,
@@ -22,15 +22,19 @@ const PaymentCard = ({
   fetchStatus?: boolean;
   children?: React.ReactNode;
 }) => {
-  const [fetched, setFetched] = useState<boolean>(false);
+  const [url, setUrl] = useState<any>(null);
+  const fetched = useRef<boolean>(false);
+  const [forceFetchStatus, setForceFetchStatus] = useState<boolean>(false);
+
   const [color, setColor] = useState<
     "" | "bg-red-100" | "bg-yellow-100" | "bg-green-100"
   >("");
   const [msg, setMsg] = useState<any>("");
 
-  function forceFetchStatus() {
-    if (fetched) return;
-    setFetched(true);
+  useEffect(() => {
+    if (fetched.current) return;
+    if (!fetchStatus && !forceFetchStatus) return;
+    fetched.current = true;
     console.log("fetching data for " + paymentId);
     onValue(
       ref(db, `payments/${auth.currentUser!.uid}/${paymentId}`),
@@ -61,16 +65,13 @@ const PaymentCard = ({
         onlyOnce: true,
       }
     );
-  }
-  useEffect(() => {
-    if (!fetchStatus || fetched) return;
-    forceFetchStatus();
-  }, [fetchStatus, paymentId]);
+  }, [fetchStatus, forceFetchStatus, paymentId]);
+
   return (
     <div
       className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4 " + color}
       onClick={() => {
-        forceFetchStatus();
+        setForceFetchStatus(true);
       }}
     >
       <div className="font-bold text-xl mb-2">#{paymentId}</div>
@@ -80,15 +81,22 @@ const PaymentCard = ({
         onClick={() => {
           const storage = getStorage();
           getDownloadURL(
-            storageRef(storage, `paymentProof/${auth.currentUser!.uid}/${paymentId}.${fileExtension}`)
+            storageRef(
+              storage,
+              `paymentProof/${
+                auth.currentUser!.uid
+              }/${paymentId}.${fileExtension}`
+            )
           ).then((url) => {
-            // go to url
-            window.open(url, "_blank");
+            setUrl(url);
           });
         }}
       >
-        Download Payment Proof
+        View Payment Proof
       </Button>
+      <div className="my-4">
+        {url ? <iframe src={url} width="100%" height="500px"></iframe> : null}
+      </div>
     </div>
   );
 };
@@ -98,25 +106,27 @@ export default function Guide() {
 
   const [payments, setPayments] = useState<any[]>([]);
   const [loaded, setLoaded] = useState<boolean>(false);
-  onAuthStateChanged(auth, (user) => {
-    if (loaded || !user) return;
-    setLoaded(true);
-    onValue(
-      ref(db, `payments/${user.uid}`),
-      (snapshot) => {
-        if (snapshot.val()) {
-          setPayments(
-            Object.keys(snapshot.val()).map((str) => [
-              str,
-              snapshot.val()[str].fileExtension,
-            ])
-          );
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (loaded || !user) return;
+      setLoaded(true);
+      onValue(
+        ref(db, `payments/${user.uid}`),
+        (snapshot) => {
+          if (snapshot.val()) {
+            setPayments(
+              Object.keys(snapshot.val()).map((str) => [
+                str,
+                snapshot.val()[str].fileExtension,
+              ])
+            );
+          }
+        },
+        {
+          onlyOnce: true,
         }
-      },
-      {
-        onlyOnce: true,
-      }
-    );
+      );
+    });
   });
 
   return (

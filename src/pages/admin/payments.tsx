@@ -1,8 +1,7 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { auth, db } from "@/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import { onValue, ref, remove, set } from "firebase/database";
+import { db } from "@/firebase";
+import { onValue, ref, update } from "firebase/database";
 import {
   getDownloadURL,
   getStorage,
@@ -22,14 +21,22 @@ const PaymentCard = ({
   paymentStatus: string;
   children?: React.ReactNode;
 }) => {
-  function makeThis(status: statusType) {
+  const [url, setUrl] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  async function makeThis(status: statusType) {
+    setIsLoading(true);
     try {
-      set(ref(db, `payments/${uid}/${paymentId}/approved`), status);
-      remove(ref(db, `admin/payments/${paymentStatus}/${uid}-${paymentId}`));
-      set(ref(db, `admin/payments/${status}/${uid}-${paymentId}`), true);
+      const updates: {
+        [key: string]: any;
+      } = {};
+      updates[`payments/${uid}/${paymentId}/approved`] = status;
+      updates[`admin/payments/${paymentStatus}/${uid}-${paymentId}`] = null;
+      updates[`admin/payments/${status}/${uid}-${paymentId}`] = true;
+      await update(ref(db), updates);
     } catch (err) {
       console.log(err);
     }
+    setIsLoading(false);
   }
   return (
     <div className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4 w-full"}>
@@ -51,18 +58,19 @@ const PaymentCard = ({
                     `paymentProof/${uid}/${paymentId}.${snapshot.val()}`
                   )
                 ).then((url) => {
-                  window.open(url, "_blank");
+                  setUrl(url);
                 });
               }
             );
           }}
         >
-          Download Payment Proof
+          View Payment Proof
         </Button>
-        {paymentStatus == "accepted" || (
+        {paymentStatus == "approved" || (
           <Button
             className="w-fit mx-2 bg-green-500"
             onClick={() => makeThis("approved")}
+            isLoading={isLoading}
           >
             Approve Payment
           </Button>
@@ -71,71 +79,86 @@ const PaymentCard = ({
           <Button
             className="w-fit mx-2 bg-yellow-500"
             onClick={() => makeThis("pending")}
+            isLoading={isLoading}
           >
-            Set Pending
+            Set Payment as Pending
           </Button>
         )}
         {paymentStatus == "rejected" || (
           <Button
             className="w-fit mx-2 bg-red-500"
             onClick={() => makeThis("rejected")}
+            isLoading={isLoading}
           >
             Reject Payment
           </Button>
         )}
+      </div>
+      <div className="my-4">
+        {url ? <iframe src={url} width="100%" height="500px"></iframe> : null}
       </div>
     </div>
   );
 };
 
 export default function App() {
-  const [show, setShow] = useState<statusType>("");
-  const [current, setCurrent] = useState<any[]>();
-
+  const [approvedPayments, setApprovedPayments] = useState<any>({});
+  const [pendingPayments, setPendingPayments] = useState<any>({});
+  const [rejectedPayments, setRejectedPayments] = useState<any>({});
   useEffect(() => {
-    if (!auth.currentUser || show == "") return;
-    onValue(ref(db, `admin/payments/${show}`), (snapshot) => {
-      setCurrent(snapshot.val());
+    onValue(ref(db, "admin/payments/approved"), (snapshot) => {
+      console.log("Update: approved");
+      setApprovedPayments(snapshot.val() || {});
     });
-  }, [show]);
+    onValue(ref(db, "admin/payments/pending"), (snapshot) => {
+      console.log("Update: pending");
+      setPendingPayments(snapshot.val() || {});
+    });
+    onValue(ref(db, "admin/payments/rejected"), (snapshot) => {
+      console.log("Update: rejected");
+      setRejectedPayments(snapshot.val() || {});
+    });
+  }, []);
+
+  const [current, setCurrent] = useState<any>({});
   return (
     <Dashboard>
       <div className="flex flex-col md:flex-row md:flex-wrap">
         <Button
           className="md:w-fit md:mx-2 my-2"
-          onClick={() => setShow("approved")}
+          onClick={() => setCurrent("approved")}
         >
           Show Approved Payments
         </Button>
         <Button
           className="md:w-fit md:mx-2 my-2"
-          onClick={() => setShow("pending")}
+          onClick={() => setCurrent("pending")}
         >
           Show Pending Approval Payments
         </Button>
         <Button
           className="md:w-fit md:mx-2 my-2"
-          onClick={() => setShow("rejected")}
+          onClick={() => setCurrent("rejected")}
         >
           Show Rejected Payments
         </Button>
-      </div>
-      <div className="m-2 font-bold text-4xl">
-        {show == "approved" && "Approved Payments"}
-        {show == "pending" && "Pending Approval Payments"}
-        {show == "rejected" && "Rejected Payments"}
-      </div>
-      <div className="flex flex-wrap">
-        {current
-          ? Object.keys(current).map((key) => (
-              <PaymentCard
-                key={key}
-                uid={key.split("-")[0]}
-                paymentId={key.split("-")[1]}
-                paymentStatus={show}
-              />
-            ))
-          : null}
+        {Object.keys(
+          current == "approved"
+            ? approvedPayments
+            : current == "pending"
+            ? pendingPayments
+            : rejectedPayments
+        ).map((key) => {
+          const [uid, paymentId] = key.split("-");
+          return (
+            <PaymentCard
+              key={key}
+              uid={uid}
+              paymentId={paymentId}
+              paymentStatus={current}
+            />
+          );
+        })}
       </div>
     </Dashboard>
   );
