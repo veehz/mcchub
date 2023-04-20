@@ -28,6 +28,12 @@ export default function Dashboard({
         ref(db, `role/${user!.uid}`),
         (snapshot) => {
           setRole(snapshot.val());
+          if (
+            router.pathname.startsWith("/admin") &&
+            snapshot.val() != "admin"
+          ) {
+            router.push("/");
+          }
         },
         { onlyOnce: true }
       );
@@ -49,7 +55,7 @@ export default function Dashboard({
               ]
             : [
                 // admin
-                ["Dashboard", "/admin/dashboard"],
+                ["Dashboard", "/admin"],
                 ["Students", "/admin/students"],
                 ["Payments", "/admin/payments"],
               ])

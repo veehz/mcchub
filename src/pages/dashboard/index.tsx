@@ -5,6 +5,7 @@ import { auth, db } from "@/firebase.js";
 import { onAuthStateChanged, sendEmailVerification } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { onValue, ref } from "firebase/database";
+import { useRouter } from "next/router";
 
 const Card = ({
   title,
@@ -69,49 +70,74 @@ export default function Home() {
 
   const [message, setMessage] = useState<string | string[]>([]);
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) return;
+  const router = useRouter();
+  const [paymentStatus, setPaymentStatus] = useState<{
+    [key: string]: number;
+  }>({});
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (!user || role) return;
 
-    if (!user!.emailVerified) {
-      setShowVerifyEmailButton(true);
-    } else {
-      setShowVerifyEmailButton(false);
-    }
+      if (!user!.emailVerified) {
+        setShowVerifyEmailButton(true);
+      } else {
+        setShowVerifyEmailButton(false);
+      }
 
-    onValue(
-      ref(db, "role/" + user!.uid),
-      (snapshot) => {
-        setRole(snapshot.val());
-        if (snapshot.val() == "student") {
-          // student
-          onValue(
-            ref(db, "users/" + user!.uid + "/nric"),
-            (snapshot) => {
-              if (!snapshot.exists()) setShowBindICButton(true);
-            },
-            { onlyOnce: true }
-          );
-          onValue(
-            ref(db, "users/" + user!.uid + "/category"),
-            (snapshot) => {
-              if (!snapshot.exists()) setShowCompleteProfileButton(true);
-            },
-            { onlyOnce: true }
-          );
-        } else {
-          // manager
-          onValue(
-            ref(db, "managedStudents/" + user!.uid),
-            (snapshot) => {
-              if (snapshot.exists())
-                setStudentCount(Object.keys(snapshot.val()).length);
-            },
-            { onlyOnce: true }
-          );
-        }
-      },
-      { onlyOnce: true }
-    );
+      onValue(
+        ref(db, "role/" + user!.uid),
+        (snapshot) => {
+          setRole(snapshot.val());
+          if (snapshot.val() == "student") {
+            // student
+            onValue(
+              ref(db, "users/" + user!.uid + "/nric"),
+              (snapshot) => {
+                if (!snapshot.exists()) setShowBindICButton(true);
+              },
+              { onlyOnce: true }
+            );
+            onValue(
+              ref(db, "users/" + user!.uid + "/category"),
+              (snapshot) => {
+                if (!snapshot.exists()) setShowCompleteProfileButton(true);
+              },
+              { onlyOnce: true }
+            );
+          } else if (
+            snapshot.val() == "teacher" ||
+            snapshot.val() == "parent"
+          ) {
+            // manager
+            onValue(
+              ref(db, "managedStudents/" + user!.uid),
+              (snapshot) => {
+                if (snapshot.exists())
+                  setStudentCount(Object.keys(snapshot.val()).length);
+              },
+              { onlyOnce: true }
+            );
+            onValue(ref(db, "payments/" + user!.uid), (snapshot) => {
+              console.log("snapshot", snapshot.val());
+              if (snapshot.exists()) {
+                for (const key in snapshot.val()) {
+                  if (snapshot.val()[key].approved)
+                    setPaymentStatus((prev) => ({
+                      ...prev,
+                      [snapshot.val()[key].approved]:
+                        parseFloat(snapshot.val()[key].amount) +
+                          prev[snapshot.val()[key].approved] || 0,
+                    }));
+                }
+              }
+            });
+          } else if (snapshot.val() == "admin") {
+            router.push("/admin");
+          }
+        },
+        { onlyOnce: true }
+      );
+    });
   });
 
   return (
@@ -184,19 +210,21 @@ export default function Home() {
         <div className="w-full md:w-1/3 px-2">
           {/* content for second column */}
           <Card title="Your Payments">
-            <Card title="Unpaid" className="bg-yellow-200">
-              <span className="text-xl">RM30.00</span>
+            <Card title="You need to pay..." className="">
+              <span className="text-xl">
+                {studentCount * parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0")}
+              </span>
             </Card>
             <div className="bg-white rounded-lg overflow-hidden shadow-lg text-center">
               <div className="flex">
                 <PartCard title="Accepted" splitInto={3} color="green">
-                  RM30.00
+                  {paymentStatus["accepted"] || 0}
                 </PartCard>
                 <PartCard title="Pending" splitInto={3} color="yellow">
-                  RM30.00
+                  {paymentStatus["pending"] || 0}
                 </PartCard>
                 <PartCard title="Rejected" splitInto={3} color="red">
-                  RM30.00
+                  {paymentStatus["rejected"] || 0}
                 </PartCard>
               </div>
             </div>

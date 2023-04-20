@@ -209,16 +209,16 @@ const rules = {
         // userid-paymentid
         $paymentId: {
           ".write": or(and(once(), isManager()), isRole("admin")),
-          ".validate": "newData.isString()",
+          ".validate": "newData.isBoolean()",
         },
       },
       approved: {
         ".write": isRole("admin"),
-        $paymentId: { ".validate": "newData.isString()" },
+        $paymentId: { ".validate": "newData.isBoolean()" },
       },
       rejected: {
         ".write": isRole("admin"),
-        $paymentId: { ".validate": "newData.isString()" },
+        $paymentId: { ".validate": "newData.isBoolean()" },
       },
     },
     userId: {

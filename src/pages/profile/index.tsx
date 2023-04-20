@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
@@ -65,16 +65,18 @@ export default function Profile() {
         updates[key as string] = data[x] ? data[x] : "";
       }
     }
-    update(child(ref(db), "users/" + auth.currentUser?.uid), updates).then(() => {
-      setIsLoading(false);
-      setAllowInput(true);
-      setMessage("Profile updated successfully.");
-    }).catch((err) => {
-      console.log(err);
-      setIsLoading(false);
-      setAllowInput(true);
-      setMessage("An error occurred. Please try again later.");
-    });
+    update(child(ref(db), "users/" + auth.currentUser?.uid), updates)
+      .then(() => {
+        setIsLoading(false);
+        setAllowInput(true);
+        setMessage("Profile updated successfully.");
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+        setAllowInput(true);
+        setMessage("An error occurred. Please try again later.");
+      });
   };
 
   function mySetValue(key: string, value: string | undefined) {
@@ -85,37 +87,40 @@ export default function Profile() {
   }
 
   const [runOnce, setRunOnce] = useState<boolean>(false);
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      if (runOnce) return;
-      setRunOnce(true);
 
-      onValue(
-        ref(db, "role/" + auth.currentUser?.uid),
-        (snapshot) => {
-          setRole(snapshot.val());
-        },
-        {
-          onlyOnce: true,
-        }
-      );
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        if (runOnce) return;
+        setRunOnce(true);
 
-      onValue(
-        child(ref(db), "users/" + auth.currentUser?.uid),
-        (snapshot) => {
-          setOriginalDetails(snapshot.val());
-          console.log(snapshot.val());
-          for (const key in snapshot.val()) {
-            const x = key as keyof Profile;
-            mySetValue(key, snapshot.val()[x]);
+        onValue(
+          ref(db, "role/" + auth.currentUser?.uid),
+          (snapshot) => {
+            setRole(snapshot.val());
+          },
+          {
+            onlyOnce: true,
           }
-          setAllowInput(true);
-        },
-        {
-          onlyOnce: true,
-        }
-      );
-    }
+        );
+
+        onValue(
+          child(ref(db), "users/" + auth.currentUser?.uid),
+          (snapshot) => {
+            setOriginalDetails(snapshot.val());
+            console.log(snapshot.val());
+            for (const key in snapshot.val()) {
+              const x = key as keyof Profile;
+              mySetValue(key, snapshot.val()[x]);
+            }
+            setAllowInput(true);
+          },
+          {
+            onlyOnce: true,
+          }
+        );
+      }
+    });
   });
 
   const Input = ({
@@ -157,16 +162,14 @@ export default function Profile() {
             </h2>
           </div>
 
-          <div>
-            {message}
-          </div>
+          <div>{message}</div>
 
           <form
             className="mt-8 space-y-6 w-full"
             onSubmit={handleSubmit(onSubmit)}
             noValidate
           >
-            {Object.keys(originalDetails).length && !originalDetails.nric ? (
+            {role == "student" && Object.keys(originalDetails).length && !originalDetails.nric ? (
               <Link href="/profile/bind-nric">
                 <Button>
                   Bind your account to an NRIC Number/Passport Number
