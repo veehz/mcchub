@@ -23,6 +23,7 @@ export default function Dashboard({
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (!user) router.push("/");
+      setUser(user);
       onValue(
         ref(db, `role/${user!.uid}`),
         (snapshot) => {
@@ -40,43 +41,23 @@ export default function Dashboard({
           pages ||
           (role == "student"
             ? [["Dashboard", "/dashboard"]]
-            : [
+            : role == "teacher" || role == "parent"
+            ? [
                 ["Dashboard", "/dashboard"],
                 ["Students", "/students"],
-                ["Payment", "/payment"],
+                ["Payment", "/payments"],
+              ]
+            : [
+                // admin
+                ["Dashboard", "/admin/dashboard"],
+                ["Students", "/admin/students"],
+                ["Payments", "/admin/payments"],
               ])
         }
         rightPages={rightPages || [["Profile", "/profile"]]}
         user={user?.email}
       />
       <main className="p-3">
-        {user && !user.emailVerified && (
-          <div className="w-full bg-yellow-100 py-4 px-4 rounded-md">
-            Your email is not verified. You cannot access your dashboard until
-            you are verified.
-            <Button
-              className="w-fit ml-2"
-              flex={false}
-              props={{
-                onClick: () => {
-                  if (user && !user?.emailVerified) {
-                    sendEmailVerification(user)
-                      .then(() => {
-                        console.log("Verification email sent.");
-                      })
-                      .catch((error) => {
-                        console.log(
-                          "Error sending verification email: " + error
-                        );
-                      });
-                  }
-                },
-              }}
-            >
-              Send Verification Email
-            </Button>
-          </div>
-        )}
         <div>{children}</div>
       </main>
     </div>
