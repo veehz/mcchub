@@ -4,7 +4,7 @@ import { auth, db } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { onValue, ref } from "firebase/database";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const StudentCard = ({
   nric,
@@ -15,13 +15,16 @@ const StudentCard = ({
   fetchStatus?: boolean;
   children?: React.ReactNode;
 }) => {
-  const [fetched, setFetched] = useState<boolean>(false);
+  const fetched = useRef<boolean>(false);
+  const [forceFetchStatus, setForceFetchStatus] = useState<boolean>(false);
+
   const [msg, setMsg] = useState<any>("");
   const [showButton, setShowButton] = useState<boolean>(false);
 
-  function forceFetchStatus() {
-    if(fetched) return;
-    setFetched(true);
+  useEffect(() => {
+    if (fetched.current) return;
+    if (!fetchStatus && !forceFetchStatus) return;
+    fetched.current = true;
     console.log("fetching data for " + nric);
     onValue(
       ref(db, "nric/" + nric + "/student"),
@@ -51,16 +54,13 @@ const StudentCard = ({
         onlyOnce: true,
       }
     );
-  }
-  useEffect(() => {
-    if (!fetchStatus || fetched) return;
-    forceFetchStatus();
-  }, [fetchStatus, nric]);
+  }, [fetchStatus, forceFetchStatus, nric]);
+
   return (
     <div
       className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4"}
       onClick={() => {
-        forceFetchStatus();
+        setForceFetchStatus(true);
       }}
     >
       <div className="font-bold text-xl mb-2">
@@ -77,22 +77,23 @@ const StudentCard = ({
 const CardList = ({ fetchStatus = false }: { fetchStatus: boolean }) => {
   const [students, setStudents] = useState<any[]>([]);
   const [loaded, setLoaded] = useState<boolean>(false);
-  onAuthStateChanged(auth, (user) => {
-    if (loaded || !user) return;
-    setLoaded(true);
-    onValue(
-      ref(db, "managedStudents/" + auth!.currentUser!.uid),
-      (snapshot) => {
-        if (snapshot.val()) {
-          setStudents(Object.keys(snapshot.val()));
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (loaded || !user) return;
+      setLoaded(true);
+      onValue(
+        ref(db, "managedStudents/" + auth!.currentUser!.uid),
+        (snapshot) => {
+          if (snapshot.val()) {
+            setStudents(Object.keys(snapshot.val()));
+          }
+        },
+        {
+          onlyOnce: true,
         }
-      },
-      {
-        onlyOnce: true,
-      }
-    );
+      );
+    });
   });
-
   return (
     <div className="flex flex-wrap">
       {students.map((str) => (
