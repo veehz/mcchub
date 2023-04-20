@@ -1,6 +1,10 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
 import Link from "next/link";
+import { auth, db } from "@/firebase.js";
+import { onAuthStateChanged, sendEmailVerification } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { onValue, ref } from "firebase/database";
 
 const Card = ({
   title,
@@ -18,26 +22,152 @@ const Card = ({
       }
     >
       <div className="font-bold text-xl mb-2">{title}</div>
-      <p className="text-gray-700 text-base">{children}</p>
+      <div className="text-gray-700 text-base">{children}</div>
+    </div>
+  );
+};
+
+const PartCard = ({
+  title,
+  children,
+  splitInto,
+  color,
+}: {
+  title: any;
+  children: any;
+  color?: string;
+  splitInto: number;
+}) => {
+  return (
+    <div
+      className={`w-1/${splitInto} ${color ? `bg-${color}-100 ` : ``}px-4 py-6`}
+    >
+      <div className="font-bold">{title}</div>
+      {children}
     </div>
   );
 };
 
 export default function Home() {
+  const [showVerifyEmailButton, setShowVerifyEmailButton] =
+    useState<boolean>(false);
+  const [showBindICButton, setShowBindICButton] = useState<boolean>(false);
+  const [showCompleteProfileButton, setShowCompleteProfileButton] =
+    useState<boolean>(false);
+
+  const [role, setRole] = useState<string>("");
+  const [studentCount, setStudentCount] = useState<number>(0);
+
+  const [message, setMessage] = useState<string | string[]>([]);
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) return;
+
+    if (!user!.emailVerified) {
+      setShowVerifyEmailButton(true);
+    } else {
+      setShowVerifyEmailButton(false);
+    }
+
+    onValue(
+      ref(db, "role/" + user!.uid),
+      (snapshot) => {
+        setRole(snapshot.val());
+        if (snapshot.val() == "student") {
+          // student
+          onValue(
+            ref(db, "users/" + user!.uid + "/nric"),
+            (snapshot) => {
+              if (!snapshot.exists()) setShowBindICButton(true);
+            },
+            { onlyOnce: true }
+          );
+          onValue(
+            ref(db, "users/" + user!.uid + "/category"),
+            (snapshot) => {
+              if (!snapshot.exists()) setShowCompleteProfileButton(true);
+            },
+            { onlyOnce: true }
+          );
+        } else {
+          // manager
+          onValue(
+            ref(db, "managedStudents/" + user!.uid),
+            (snapshot) => {
+              if (snapshot.exists())
+                setStudentCount(Object.keys(snapshot.val()).length);
+            },
+            { onlyOnce: true }
+          );
+        }
+      },
+      { onlyOnce: true }
+    );
+  });
+
   return (
     <Dashboard>
       <div className="flex flex-col md:flex-row md:justify-between">
         <div className="w-full md:w-1/3 px-2">
           {/* content for first column */}
+          {/* Todo Card */}
           <Card title="To-do">
             <div className="flex flex-col space-y-2">
-              <Button>Verify Your Email</Button>
-              <Link href="/profile/bind-nric/">
-                <Button>Bind Your IC Number</Button>
-              </Link>
-              <Button>Add Students</Button>
+              <div>
+                {typeof message === "string"
+                  ? message
+                  : message.map((msg, index) => <div key={index}>{msg}</div>)}
+              </div>
+              {showVerifyEmailButton ? (
+                <Button
+                  onClick={() => {
+                    if (auth.currentUser)
+                      sendEmailVerification(auth.currentUser)
+                        .then(() => {
+                          setMessage("Verification email sent.");
+                        })
+                        .catch((error) => {
+                          setMessage(error.message);
+                        });
+                  }}
+                >
+                  Verify Your Email
+                </Button>
+              ) : null}
+
+              {showBindICButton ? (
+                <Link href="/profile/bind-nric/">
+                  <Button>Bind Your IC Number</Button>
+                </Link>
+              ) : null}
+
+              {showCompleteProfileButton ? (
+                <Link href="/profile">
+                  <Button>Complete Your Profile</Button>
+                </Link>
+              ) : null}
+              {!showVerifyEmailButton &&
+              !showBindICButton &&
+              !showCompleteProfileButton ? (
+                <div className="text-green-500">All done!</div>
+              ) : null}
             </div>
           </Card>
+
+          {["teacher", "parent"].includes(role) ? (
+            <Card title="Students">
+              <div>
+                {studentCount} {studentCount == 1 ? "student" : "students"}{" "}
+              </div>
+              {studentCount == 0 ? (
+                <div className="text-red-500">Remember to add students!</div>
+              ) : null}
+              <Link href="/students">
+                <Button>Add Students</Button>
+              </Link>
+            </Card>
+          ) : null}
+
           <Card title="Announcements">
             This is a description of my card. It can be multiple lines long.
           </Card>
@@ -45,33 +175,20 @@ export default function Home() {
         <div className="w-full md:w-1/3 px-2">
           {/* content for second column */}
           <Card title="Your Payments">
-            <Card title="Accepted" className="bg-green-100">
+            <Card title="Unpaid" className="bg-yellow-200">
               <span className="text-xl">RM30.00</span>
             </Card>
-            <Card title="Pending" className="bg-yellow-100">
-              <span className="text-xl">RM10.00</span>
-            </Card>
-            <Card title="Rejected" className="bg-red-100">
-              <span className="text-xl">RM10.00</span>
-            </Card>
-            OR
             <div className="bg-white rounded-lg overflow-hidden shadow-lg text-center">
               <div className="flex">
-                <div className="w-1/3 bg-green-100 px-4 py-6">
-                  <span className="font-bold">Accepted</span>
-                  <br />
+                <PartCard title="Accepted" splitInto={3} color="green">
                   RM30.00
-                </div>
-                <div className="w-1/3 bg-yellow-100 px-4 py-6">
-                  <span className="font-bold">Pending</span>
-                  <br />
-                  RM45.00
-                </div>
-                <div className="w-1/3 bg-red-100 px-4 py-6">
-                  <span className="font-bold">Rejected</span>
-                  <br />
-                  RM15.00
-                </div>
+                </PartCard>
+                <PartCard title="Pending" splitInto={3} color="yellow">
+                  RM30.00
+                </PartCard>
+                <PartCard title="Rejected" splitInto={3} color="red">
+                  RM30.00
+                </PartCard>
               </div>
             </div>
           </Card>
