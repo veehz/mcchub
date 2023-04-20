@@ -5,7 +5,6 @@ import { User as FirebaseUser, sendEmailVerification } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-import Button from "@/components/Button";
 import { onValue, ref } from "firebase/database";
 
 export default function Dashboard({
@@ -22,7 +21,10 @@ export default function Dashboard({
   const router = useRouter();
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      if (!user) router.push("/");
+      if (!user){
+        router.push("/");
+        return;
+      }
       setUser(user);
       onValue(
         ref(db, `role/${user!.uid}`),
