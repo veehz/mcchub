@@ -1,6 +1,6 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
@@ -12,6 +12,8 @@ import RadioInputList from "@/components/FormComponents/RadioInputList";
 import RadioInput from "@/components/FormComponents/RadioInput";
 
 import nationalities from "@/data/nationalities";
+import Modal, { ModalInfo, reducer } from "@/components/Modal";
+import { useRouter } from "next/router";
 
 interface NRICInput {
   isMalaysian: "null" | "true" | "false";
@@ -37,6 +39,21 @@ export default function Profile() {
   const isMalaysian = watch("isMalaysian", "null");
   const [submitted, setSubmitted] = useState<boolean>(false);
 
+  const [state, dispatch] = useReducer(reducer, {});
+  const errorModal: ModalInfo = {
+    title: "Error.",
+    icon: "error",
+    children: "There was an error. Please contact us if problem persists.",
+    hidden: false,
+    mainText: "OK",
+    mainColors: "bg-red-600",
+    mainOnClick: () => {
+      dispatch({ hidden: true });
+    },
+    secondaryShow: false,
+  };
+
+  const router = useRouter();
   const onSubmit: SubmitHandler<NRICInput> = async (data) => {
     // check if nric is taken
     setIsLoading(true);
@@ -47,28 +64,40 @@ export default function Profile() {
     const passport = data.passport ? data.passport.trim() : "";
 
     if (isMalaysian === "null") {
-      setMessage("Please select your nationality.");
+      dispatch({
+        ...errorModal,
+        children: "Please select your nationality.",
+      });
       setIsLoading(false);
       setAllowInput(true);
       return;
     }
 
     if (isMalaysian === "true" && nric.length === 0) {
-      setMessage("NRIC cannot be empty.");
+      dispatch({
+        ...errorModal,
+        children: "Please enter your NRIC.",
+      });
       setIsLoading(false);
       setAllowInput(true);
       return;
     }
 
     if (isMalaysian === "false" && nat.length === 0) {
-      setMessage("Nationality cannot be empty.");
+      dispatch({
+        ...errorModal,
+        children: "Please select your nationality.",
+      });
       setIsLoading(false);
       setAllowInput(true);
       return;
     }
 
     if (isMalaysian === "false" && passport.length === 0) {
-      setMessage("Passport cannot be empty.");
+      dispatch({
+        ...errorModal,
+        children: "Please enter your passport number.",
+      });
       setIsLoading(false);
       setAllowInput(true);
       return;
@@ -80,9 +109,11 @@ export default function Profile() {
       ref(db, "nric/" + identification + "/student"),
       async (snapshot) => {
         if (snapshot.val()) {
-          setMessage(
-            "NRIC/Passport is already taken. Please contact us if this is a mistake."
-          );
+          dispatch({
+            ...errorModal,
+            children:
+              "NRIC/Passport Number is already taken. Please contact us if this is a mistake.",
+          });
           setIsLoading(false);
           return;
         } else {
@@ -100,12 +131,28 @@ export default function Profile() {
               ref(db, "nric/" + identification + "/student"),
               auth.currentUser?.uid
             );
-            setMessage("NRIC/Passport is successfully bound.");
+            dispatch({
+              title: "Success!",
+              icon: "checkmark",
+              children: "Profile is successfully bound.",
+              hidden: false,
+              mainText: "OK",
+              mainColors: "bg-green-600",
+              mainOnClick: () => {
+                dispatch({ hidden: true });
+                router.push("/dashboard");
+              },
+              secondaryShow: false,
+            });
             setIsLoading(false);
 
             setAllowInput(false);
           } catch (e) {
-            setMessage("An error occured. Please try again later.");
+            dispatch({
+              ...errorModal,
+              children:
+                "There was an error. Please contact us if problem persists.",
+            });
             setIsLoading(false);
             setAllowInput(true);
             return;
@@ -281,6 +328,7 @@ export default function Profile() {
           </form>
         </div>
       </div>
+      {Modal(state)}
     </Dashboard>
   );
 }

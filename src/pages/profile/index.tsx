@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
@@ -13,6 +13,8 @@ import TextInput from "@/components/FormComponents/TextInput";
 import RadioInput from "@/components/FormComponents/RadioInput";
 import RadioInputList from "@/components/FormComponents/RadioInputList";
 import Link from "next/link";
+import Modal, { reducer, ModalInfo } from "@/components/Modal";
+import { useRouter } from "next/router";
 
 interface Profile {
   name?: string;
@@ -48,7 +50,8 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [role, setRole] = useState<string>("");
 
-  const [message, setMessage] = useState<string>("");
+  const router = useRouter();
+  const [state, dispatch] = useReducer(reducer, {});
 
   const [originalDetails, setOriginalDetails] = useState<Profile>({});
   const onSubmit: SubmitHandler<Profile> = (data) => {
@@ -69,13 +72,36 @@ export default function Profile() {
       .then(() => {
         setIsLoading(false);
         setAllowInput(true);
-        setMessage("Profile updated successfully.");
+        dispatch({
+          hidden: false,
+          title: "Profile Updated Successfully",
+          icon: "checkmark",
+          mainText: "OK",
+          mainOnClick: () => {
+            dispatch({ hidden: true });
+            router.push("/dashboard");
+          },
+          mainColors: "bg-green-600",
+          secondaryShow: false,
+        });
       })
       .catch((err) => {
         console.log(err);
         setIsLoading(false);
         setAllowInput(true);
-        setMessage("An error occurred. Please try again later.");
+        dispatch({
+          hidden: false,
+          title: "Error",
+          children:
+            "An error occurred. Please try again later. If problem persists, please contact us.",
+          icon: "error",
+          mainText: "OK",
+          mainOnClick: () => {
+            dispatch({ hidden: true });
+          },
+          mainColors: "bg-red-600",
+          secondaryShow: false,
+        });
       });
   };
 
@@ -162,14 +188,14 @@ export default function Profile() {
             </h2>
           </div>
 
-          <div>{message}</div>
-
           <form
             className="mt-8 space-y-6 w-full"
             onSubmit={handleSubmit(onSubmit)}
             noValidate
           >
-            {role == "student" && Object.keys(originalDetails).length && !originalDetails.nric ? (
+            {role == "student" &&
+            Object.keys(originalDetails).length &&
+            !originalDetails.nric ? (
               <Link href="/profile/bind-nric">
                 <Button>
                   Bind your account to an NRIC Number/Passport Number
@@ -341,6 +367,7 @@ export default function Profile() {
           </form>
         </div>
       </div>
+      {Modal(state)}
     </Dashboard>
   );
 }

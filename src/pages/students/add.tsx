@@ -1,6 +1,6 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import InputList from "@/components/FormComponents/InputList";
 
 import nationalities from "@/data/nationalities";
+import Modal, { ModalInfo, reducer } from "@/components/Modal";
 
 interface NRICInput {
   isMalaysian: "true" | "false";
@@ -36,9 +37,22 @@ export default function App() {
 
   const [allowInput, setAllowInput] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string | Array<string>>("");
 
   const isMalaysian = watch("isMalaysian", "true");
+
+  const [state, dispatch] = useReducer(reducer, {});
+  const errorModal: ModalInfo = {
+    title: "Error.",
+    icon: "error",
+    children: "There was an error. Please contact us if problem persists.",
+    hidden: false,
+    mainText: "OK",
+    mainColors: "bg-red-600",
+    mainOnClick: () => {
+      dispatch({ hidden: true });
+    },
+    secondaryShow: false,
+  };
 
   const router = useRouter();
   const onSubmit: SubmitHandler<NRICInput> = async (data) => {
@@ -51,14 +65,20 @@ export default function App() {
     const identification = isMalaysian === "true" ? nric : passport;
 
     if (isMalaysian === "true" && nric.length === 0) {
-      setMessage("NRIC cannot be empty.");
+      dispatch({
+        ...errorModal,
+        children: "Please enter your NRIC.",
+      });
       setIsLoading(false);
       setAllowInput(true);
       return;
     }
 
     if (isMalaysian === "false" && passport.length === 0) {
-      setMessage("Passport number cannot be empty.");
+      dispatch({
+        ...errorModal,
+        children: "Please enter your passport number.",
+      })
       setIsLoading(false);
       setAllowInput(true);
       return;
@@ -68,14 +88,25 @@ export default function App() {
       ref(db, "nric/" + identification + "/manager"),
       async (snapshot) => {
         if (snapshot.val()) {
-          setMessage(
-            "NRIC/Passport is already taken. Please contact us if this is a mistake."
-          );
+          dispatch({
+            ...errorModal,
+            children:
+              "NRIC/Passport Number is already taken. Please contact us if this is a mistake.",
+          });
           setIsLoading(false);
           return;
         } else {
           try {
-            await set(ref(db, "managedStudents/" + auth!.currentUser!.uid + "/" + identification), true);
+            await set(
+              ref(
+                db,
+                "managedStudents/" +
+                  auth!.currentUser!.uid +
+                  "/" +
+                  identification
+              ),
+              true
+            );
             await set(
               ref(db, "nric/" + identification + "/manager"),
               auth!.currentUser!.uid
@@ -83,11 +114,18 @@ export default function App() {
             router.push("/students");
           } catch (e) {
             console.log(e);
-            setMessage("An error occurred. Please try again later.");
+            dispatch({
+              ...errorModal,
+              children:
+                "There was an error. Please contact us if problem persists.",
+            });
             setIsLoading(false);
             setAllowInput(true);
           }
         }
+      },
+      {
+        onlyOnce: true,
       }
     );
   };
@@ -114,11 +152,7 @@ export default function App() {
               Add Student
             </h2>
           </div>
-          <div className="text-center text-sm">
-            {typeof message === "string"
-              ? message
-              : message.map((msg, index) => <p key={index}>{msg}</p>)}
-          </div>
+
           <form
             className="space-y-6 w-full"
             onSubmit={handleSubmit(onSubmit)}
@@ -182,6 +216,7 @@ export default function App() {
           </form>
         </div>
       </div>
+      {Modal(state)}
     </Dashboard>
   );
 }

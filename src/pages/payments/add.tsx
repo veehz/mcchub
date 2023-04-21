@@ -1,12 +1,14 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import TextInput from "@/components/FormComponents/TextInput";
 import { onValue, ref, set } from "firebase/database";
 import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { auth, db } from "@/firebase";
+import Modal, { reducer } from "@/components/Modal";
+import { useRouter } from "next/router";
 
 interface PaymentInput {
   amount: string;
@@ -34,6 +36,9 @@ export default function App() {
 
   const file = watch("proof");
 
+  const [state, dispatch] = useReducer(reducer, {});
+
+  const router = useRouter();
   const onSubmit: SubmitHandler<PaymentInput> = async (data) => {
     setIsLoading(true);
     setAllowInput(false);
@@ -81,25 +86,55 @@ export default function App() {
                 true
               );
 
-              setMessage(
-                "Payment has been successfully uploaded. Please wait for approval."
-              );
+              dispatch({
+                title: "Success",
+                icon: "checkmark",
+                children: "Payment has been successfully uploaded.",
+                hidden: false,
+                mainText: "OK",
+                mainColors: "bg-green-600",
+                mainOnClick: () => {
+                  dispatch({ hidden: true });
+                  router.push("/payments");
+                },
+                secondaryShow: false,
+              });
               setIsLoading(false);
             } catch (err) {
               console.log(err);
 
-              setMessage(
-                "There was an error processing your payment. Please contact us if problem persists."
-              );
+              dispatch({
+                title: "Error.",
+                icon: "error",
+                children:
+                  "There was an error processing your payment. Please contact us if problem persists.",
+                hidden: false,
+                mainText: "OK",
+                mainColors: "bg-red-600",
+                mainOnClick: () => {
+                  dispatch({ hidden: true });
+                },
+                secondaryShow: false,
+              });
               setAllowInput(true);
               setIsLoading(false);
             }
           })
           .catch((err) => {
             console.log(err);
-            setMessage(
-              "Error uploading file. Please try again. If the problem persists, please contact us."
-            );
+            dispatch({
+              title: "Error.",
+              icon: "error",
+              children:
+                "There was an error uploading your file. Please contact us if problem persists.",
+              hidden: false,
+              mainText: "OK",
+              mainColors: "bg-red-600",
+              mainOnClick: () => {
+                dispatch({ hidden: true });
+              },
+              secondaryShow: false,
+            });
             setAllowInput(true);
             setIsLoading(false);
           });
@@ -223,6 +258,7 @@ export default function App() {
           </form>
         </div>
       </div>
+      {Modal(state)}
     </Dashboard>
   );
 }
