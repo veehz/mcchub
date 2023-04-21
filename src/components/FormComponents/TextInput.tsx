@@ -5,19 +5,21 @@ export default function TextInput({
   hook,
   disabled = false,
   errorMsg,
+  props,
 }: {
   children?: React.ReactNode;
-  inputName?: string;
+  inputName?: string | null;
   id?: string;
   placeholder?: string;
   hook?: any;
   disabled?: boolean;
   errorMsg?: string;
+  props?: any;
 }) {
   return (
     <div className="w-full">
       <div className="px-2 py-1">
-        <label htmlFor={id}>{inputName || placeholder}</label>
+        <label htmlFor={id}>{inputName === undefined ? placeholder : inputName ? inputName : null}</label>
       </div>
       <input
         type="text"
@@ -29,6 +31,7 @@ export default function TextInput({
         disabled={disabled}
         id={id}
         placeholder={placeholder}
+        {...props}
         {...hook}
       ></input>
       <div className="px-2 py-1">
