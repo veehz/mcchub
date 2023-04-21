@@ -1,7 +1,7 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { db } from "@/firebase";
-import { onValue, ref, update } from "firebase/database";
+import { auth, db } from "@/firebase";
+import { onValue, ref, set } from "firebase/database";
 import {
   getDownloadURL,
   getStorage,
@@ -24,17 +24,12 @@ const PaymentCard = ({
   const [url, setUrl] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   async function makeThis(status: statusType) {
-    console.log("paymentStatus", paymentStatus);
     setIsLoading(true);
     try {
-      const updates: {
-        [key: string]: any;
-      } = {};
-      updates[`payments/${uid}/${paymentId}/approved`] = status;
-      updates[`admin/payments/${paymentStatus}/${uid}-${paymentId}`] = null;
-      updates[`admin/payments/${status}/${uid}-${paymentId}`] = true;
-      console.log(JSON.stringify(updates, null, 2));
-      await update(ref(db), updates);
+      await set(ref(db, `payments/${uid}/${paymentId}/approved`), {
+        status,
+        by: auth.currentUser!.uid
+      });
     } catch (err) {
       console.log(err);
     }
@@ -105,21 +100,35 @@ const PaymentCard = ({
 };
 
 export default function App() {
-  const [approvedPayments, setApprovedPayments] = useState<any>({});
-  const [pendingPayments, setPendingPayments] = useState<any>({});
-  const [rejectedPayments, setRejectedPayments] = useState<any>({});
+  const [payments, setPayments] = useState<any>({});
   useEffect(() => {
-    onValue(ref(db, "admin/payments/approved"), (snapshot) => {
-      console.log("Update: approved");
-      setApprovedPayments(snapshot.val() || {});
-    });
-    onValue(ref(db, "admin/payments/pending"), (snapshot) => {
-      console.log("Update: pending");
-      setPendingPayments(snapshot.val() || {});
-    });
-    onValue(ref(db, "admin/payments/rejected"), (snapshot) => {
-      console.log("Update: rejected");
-      setRejectedPayments(snapshot.val() || {});
+    onValue(ref(db, "payments"), (snapshot) => {
+      console.log("Update: payments");
+      const current : {
+        [key: string] : any[]
+      } = {
+        approved: [],
+        pending: [],
+        rejected: [],
+      };
+      console.log(snapshot.val());
+      if(!snapshot.val()) return current;
+      for(const userId in snapshot.val()) {
+        for(const paymentId in snapshot.val()[userId]) {
+          const payment = snapshot.val()[userId][paymentId];
+          if(!payment?.approved?.status) current.pending.push({
+            ...payment,
+            userId,
+            paymentId
+          });
+          else current[payment.approved.status].push({
+            ...payment,
+            userId,
+            paymentId
+          });
+        }
+      }
+      setPayments(current);
     });
   }, []);
 
@@ -145,25 +154,17 @@ export default function App() {
         >
           Show Rejected Payments
         </Button>
-        {Object.keys(
-          current == "approved"
-            ? approvedPayments
-            : current == "pending"
-            ? pendingPayments
-            : current == "rejected"
-            ? rejectedPayments
-            : {}
-        ).map((key) => {
-          const [uid, paymentId] = key.split("-");
+        {current ? payments[current]?.map((payment : any) => {
+          const {userId, paymentId} = payment;
           return (
             <PaymentCard
-              key={key}
-              uid={uid}
+              key={userId + "-" + paymentId}
+              uid={userId}
               paymentId={paymentId}
-              paymentStatus={current}
+              paymentStatus={payment?.approved?.status || "pending"}
             />
           );
-        })}
+        }) : null}
       </div>
     </Dashboard>
   );

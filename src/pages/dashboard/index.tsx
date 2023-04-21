@@ -124,9 +124,9 @@ export default function Home() {
                   if (snapshot.val()[key].approved)
                     setPaymentStatus((prev) => ({
                       ...prev,
-                      [snapshot.val()[key].approved]:
+                      [snapshot.val()[key].approved.status]:
                         parseFloat(snapshot.val()[key].amount) +
-                          prev[snapshot.val()[key].approved] || 0,
+                          prev[snapshot.val()[key].approved.status] || 0,
                     }));
                 }
               }

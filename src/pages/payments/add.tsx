@@ -4,7 +4,7 @@ import { useReducer, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import TextInput from "@/components/FormComponents/TextInput";
-import { onValue, ref, set } from "firebase/database";
+import { onValue, ref, update } from "firebase/database";
 import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { auth, db } from "@/firebase";
 import Modal, { reducer } from "@/components/Modal";
@@ -61,31 +61,17 @@ export default function App() {
           `paymentProof/${auth.currentUser!.uid}/${paymentId}.${fileExtension}`
         );
         uploadBytes(storage, proof)
-          .then(() => {
+          .then(async () => {
             console.log("Uploaded");
             try {
-              set(
-                ref(
-                  db,
-                  `payments/${auth.currentUser!.uid}/${paymentId}/amount`
-                ),
-                amount
-              );
-              set(
-                ref(
-                  db,
-                  `payments/${auth.currentUser!.uid}/${paymentId}/fileExtension`
-                ),
-                fileExtension
-              );
-              set(
-                ref(
-                  db,
-                  `admin/payments/pending/${auth.currentUser!.uid}-${paymentId}`
-                ),
-                true
-              );
+             const updates : {
+                [key: string]: any
+             } = {};
 
+              updates["amount"] = amount;
+              updates["fileExtension"] = fileExtension;
+
+              await update(ref(db, `payments/${auth.currentUser!.uid}/${paymentId}`), updates);
               dispatch({
                 title: "Success",
                 icon: "checkmark",

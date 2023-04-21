@@ -45,6 +45,7 @@ function curDataIs(value, data = "data.val()") {
 }
 
 const rules = {
+  ".read": isRole("admin"),
   users: {
     $userId: {
       // data.child('nric').exists() && root.child('nric/' + data.child('nric').val() + '/manager').val() == auth.uid
@@ -66,6 +67,7 @@ const rules = {
         city: { ".validate": "true" },
         state: { ".validate": "true" },
         country: { ".validate": "true" },
+        $other: { ".validate": "false" },
       },
 
       // student details
@@ -172,20 +174,19 @@ const rules = {
           ".write": or(once(), isRole("admin")),
           ".validate": "newData.isString()",
         },
-
         approved: {
-          ".write": or(and(once(), newDataIs(["'pending'"])), isRole("admin")),
-          ".validate": and(
-            "newData.isString()",
-            newDataIs(["'approved'", "'pending'", "'rejected'"])
-          ),
-        },
-        approvedBy: {
-          ".write": or(
-            and(once(), newDataIs(["''"])),
-            and(isRole("admin"), newDataIs(["auth.uid"]))
-          ),
-          ".validate": "newData.isString()",
+          ".write": isRole("admin"),
+          status: {
+            ".validate": and(
+              "newData.isString()",
+              newDataIs(["'approved'", "'pending'", "'rejected'"])
+            ),
+          },
+          by: {
+            ".write": newDataIs(["auth.uid"]),
+            ".validate": "newData.isString()",
+          },
+          $other: { ".validate": "false" },
         },
         $other: { ".validate": "false" },
       },
@@ -199,49 +200,7 @@ const rules = {
     registrationDeadline: { ".validate": "newData.isNumber()" },
   },
 
-  admin: {
-    // admin can read
-    // admin can write in individual spaces
-    ".read": isRole("admin"),
-    payments: {
-      pending: {
-        // manager can create here
-        // userid-paymentid
-        $paymentId: {
-          ".write": or(and(once(), isManager()), isRole("admin")),
-          ".validate": "newData.isBoolean()",
-        },
-      },
-      approved: {
-        ".write": isRole("admin"),
-        $paymentId: { ".validate": "newData.isBoolean()" },
-      },
-      rejected: {
-        ".write": isRole("admin"),
-        $paymentId: { ".validate": "newData.isBoolean()" },
-      },
-    },
-    userId: {
-      student: {
-        // student can create here
-        $userId: {
-          ".write": or(and(once(), self(), isRole("student")), isRole("admin")),
-        },
-      },
-      teacher: {
-        // teacher can create here
-        $userId: {
-          ".write": or(and(once(), self(), isRole("teacher")), isRole("admin")),
-        },
-      },
-      parent: {
-        // parent can create here
-        $userId: {
-          ".write": or(and(once(), self(), isRole("parent")), isRole("admin")),
-        },
-      },
-    },
-  },
+  $other: { ".validate": "false" },
 };
 
 console.log(JSON.stringify({ rules }, null, 2));

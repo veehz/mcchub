@@ -48,13 +48,13 @@ const PaymentCard = ({
           return;
         }
 
-        if (snapshot.val().status == "pending" || !snapshot.val().status) {
+        if (!snapshot.val()?.approved?.status || snapshot.val().approved.status == "pending") {
           setMsg("Pending Approval.");
           setColor("bg-yellow-100");
-        } else if (snapshot.val().status == "approved") {
+        } else if (snapshot.val().approved.status == "approved") {
           setMsg("Payment status is approved.");
           setColor("bg-green-100");
-        } else if (snapshot.val().status == "rejected") {
+        } else if (snapshot.val().approved.status == "rejected") {
           setMsg(
             "Payment status is rejected. You may contact us for more details."
           );

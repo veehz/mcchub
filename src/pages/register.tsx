@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
-import { ref, set } from "firebase/database";
+import { ref, update } from "firebase/database";
 import {
   User as FirebaseUser,
   createUserWithEmailAndPassword,
@@ -39,22 +39,20 @@ export default function Register() {
   const onSubmit: SubmitHandler<LoginInput> = (data) => {
     setIsLoading(true);
     createUserWithEmailAndPassword(auth, data.email, data.password)
-      .then((userCredential) => {
-        set(ref(db, "role/" + userCredential.user.uid), data.type).then(() => {
-          console.log("Role set!")
-        })
-        .catch((error) => {
-          console.log("Role set error!", error)
-        });
-        set(ref(db, "users/" + userCredential.user.uid), {
-          email: data.email,
-        }).then(() => {
-          console.log("Email set!")
-        })
-        .catch((error) => {
-          console.log("Email set error!", error)
-        });
-        // sendEmailVerification(userCredential.user);
+      .then(async (userCredential) => {
+        const updates: {
+          [key: string]: any;
+        } = {};
+        updates["role/" + userCredential.user.uid] = data.type;
+        updates["admin/role/" + userCredential.user.uid] = data.type;
+        updates["users/" + userCredential.user.uid + "/email"] = data.email;
+        try {
+          await update(ref(db), updates);
+        } catch (e) {
+          setErrorMsg(
+            "There was a problem creating your account. Please contact us."
+          );
+        }
       })
       .catch((error) => {
         setIsLoading(false);
