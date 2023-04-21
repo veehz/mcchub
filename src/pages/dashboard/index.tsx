@@ -78,11 +78,7 @@ export default function Home() {
     onAuthStateChanged(auth, (user) => {
       if (!user || role) return;
 
-      if (!user!.emailVerified) {
-        setShowVerifyEmailButton(true);
-      } else {
-        setShowVerifyEmailButton(false);
-      }
+      setShowVerifyEmailButton(!user!.emailVerified);
 
       onValue(
         ref(db, "role/" + user!.uid),
@@ -117,20 +113,24 @@ export default function Home() {
               },
               { onlyOnce: true }
             );
-            onValue(ref(db, "payments/" + user!.uid), (snapshot) => {
-              console.log("snapshot", snapshot.val());
-              if (snapshot.exists()) {
-                for (const key in snapshot.val()) {
-                  if (snapshot.val()[key].approved)
-                    setPaymentStatus((prev) => ({
-                      ...prev,
-                      [snapshot.val()[key].approved.status]:
-                        parseFloat(snapshot.val()[key].amount) +
-                          prev[snapshot.val()[key].approved.status] || 0,
-                    }));
+            onValue(
+              ref(db, "payments/" + user!.uid),
+              (snapshot) => {
+                console.log("snapshot", snapshot.val());
+                if (snapshot.exists()) {
+                  for (const key in snapshot.val()) {
+                    if (snapshot.val()[key].approved)
+                      setPaymentStatus((prev) => ({
+                        ...prev,
+                        [snapshot.val()[key].approved.status]:
+                          parseFloat(snapshot.val()[key].amount) +
+                            prev[snapshot.val()[key].approved.status] || 0,
+                      }));
+                  }
                 }
-              }
-            });
+              },
+              { onlyOnce: true }
+            );
           } else if (snapshot.val() == "admin") {
             router.push("/admin");
           }
@@ -212,7 +212,8 @@ export default function Home() {
           <Card title="Your Payments">
             <Card title="You need to pay..." className="">
               <span className="text-xl">
-                {studentCount * parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0")}
+                {studentCount *
+                  parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0")}
               </span>
             </Card>
             <div className="bg-white rounded-lg overflow-hidden shadow-lg text-center">

@@ -77,6 +77,7 @@ export default function App() {
           : 10001;
         const fileExtension = proof.name.split(".").pop();
 
+        console.log(`paymentProof/${auth.currentUser!.uid}/${paymentId}-${uniqueId}.${fileExtension}`);
         const storage = storageRef(
           getStorage(),
           `paymentProof/${auth.currentUser!.uid}/${paymentId}-${uniqueId}.${fileExtension}`
@@ -226,7 +227,6 @@ export default function App() {
                                 required: "Payment proof is required",
                                 validate: {
                                   lessThan3MB: (fileList) => {
-                                    console.log(fileList);
                                     return (
                                       (fileList &&
                                         fileList[0].size < 3000000) ||

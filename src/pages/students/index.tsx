@@ -74,16 +74,17 @@ const StudentCard = ({
   );
 };
 
-const CardList = ({ fetchStatus = false }: { fetchStatus: boolean }) => {
+export default function App() {
+  const [fetchStatus, setFetchStatus] = useState<boolean>(false);
+
   const [students, setStudents] = useState<any[]>([]);
-  const [loaded, setLoaded] = useState<boolean>(false);
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      if (loaded || !user) return;
-      setLoaded(true);
+      if(!user) return;
       onValue(
-        ref(db, "managedStudents/" + auth!.currentUser!.uid),
+        ref(db, "managedStudents/" + user.uid),
         (snapshot) => {
+          console.log("snapshot", snapshot.val());
           if (snapshot.val()) {
             setStudents(Object.keys(snapshot.val()));
           }
@@ -93,20 +94,7 @@ const CardList = ({ fetchStatus = false }: { fetchStatus: boolean }) => {
         }
       );
     });
-  });
-  return (
-    <div className="flex flex-wrap">
-      {students.map((str) => (
-        <div key={str} className="w-72 p-4">
-          <StudentCard nric={str} fetchStatus={fetchStatus}></StudentCard>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-export default function App() {
-  const [fetchStatus, setFetchStatus] = useState<boolean>(false);
+  }, []);
 
   return (
     <Dashboard>
@@ -123,7 +111,13 @@ export default function App() {
           Fetch All Student Status
         </Button>
       </div>
-      <CardList fetchStatus={fetchStatus} />
+      <div className="flex flex-wrap">
+        {students.map((str) => (
+          <div key={str} className="w-72 p-4">
+            <StudentCard nric={str} fetchStatus={fetchStatus}></StudentCard>
+          </div>
+        ))}
+      </div>
     </Dashboard>
   );
 }
