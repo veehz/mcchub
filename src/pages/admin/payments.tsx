@@ -42,7 +42,7 @@ const PaymentCard = ({
       {/* <div className="text-gray-700 text-base mb-2">{msg}</div> */}
       <div className="flex">
         <Button
-          className="w-fit mr-2"
+          className="mx-2 my-1"
           onClick={() => {
             const storage = getStorage();
             getDownloadURL(
@@ -57,9 +57,25 @@ const PaymentCard = ({
         >
           View Payment Proof
         </Button>
+        <Button
+          className="mx-2 my-1"
+          onClick={() => {
+            const storage = getStorage();
+            getDownloadURL(
+              storageRef(
+                storage,
+                `paymentProof/${uid}/${paymentId}-${payment.uniqueId}.${payment.fileExtension}`
+              )
+            ).then((url) => {
+              window.open(url, "_blank");
+            });
+          }}
+        >
+          Download Payment Proof
+        </Button>
         {paymentStatus == "approved" || (
           <Button
-            className="w-fit mx-2 bg-green-500"
+            className="mx-2 my-1 bg-green-500"
             onClick={() => makeThis("approved")}
             isLoading={isLoading}
           >
@@ -68,7 +84,7 @@ const PaymentCard = ({
         )}
         {paymentStatus == "pending" || (
           <Button
-            className="w-fit mx-2 bg-yellow-500"
+            className="mx-2 my-1 bg-yellow-500"
             onClick={() => makeThis("pending")}
             isLoading={isLoading}
           >
@@ -77,7 +93,7 @@ const PaymentCard = ({
         )}
         {paymentStatus == "rejected" || (
           <Button
-            className="w-fit mx-2 bg-red-500"
+            className="mx-2 my-1 bg-red-500"
             onClick={() => makeThis("rejected")}
             isLoading={isLoading}
           >
