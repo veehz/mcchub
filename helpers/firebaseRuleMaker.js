@@ -162,7 +162,7 @@ const rules = {
 
   payments: {
     $userId: {
-      ".read": "true",
+      ".read": self(),
       $paymentId: {
         // managers can create, can read, cannot edit
         ".write": or(self(), isRole("admin")),
@@ -171,6 +171,10 @@ const rules = {
           ".validate": "newData.isString()",
         },
         fileExtension: {
+          ".write": or(once(), isRole("admin")),
+          ".validate": "newData.isString()",
+        },
+        uniqueId: {
           ".write": or(once(), isRole("admin")),
           ".validate": "newData.isString()",
         },

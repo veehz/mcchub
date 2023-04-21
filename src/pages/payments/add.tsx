@@ -15,6 +15,26 @@ interface PaymentInput {
   proof: FileList | null;
 }
 
+function createUniqueId(): string {
+  const baseChars =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let num = new Date().valueOf();
+  let result = "";
+
+  // timestamp
+  do {
+    result = baseChars[num % 62] + result;
+    num = Math.floor(num / 62);
+  } while (num > 0);
+
+  // random 5 chars
+  for (let i = 0; i < 5; i++) {
+    result += baseChars[Math.floor(Math.random() * 62)];
+  }
+
+  return result;
+}
+
 export default function App() {
   const [message, setMessage] = useState<string | string[]>([
     "Payment to bank:",
@@ -51,6 +71,7 @@ export default function App() {
     onValue(
       ref(db, `payments/${auth.currentUser!.uid}`),
       (snapshot) => {
+        const uniqueId = createUniqueId();
         const paymentId = snapshot.exists()
           ? Object.keys(snapshot.val()).length + 1 + 10000
           : 10001;
@@ -58,20 +79,24 @@ export default function App() {
 
         const storage = storageRef(
           getStorage(),
-          `paymentProof/${auth.currentUser!.uid}/${paymentId}.${fileExtension}`
+          `paymentProof/${auth.currentUser!.uid}/${paymentId}-${uniqueId}.${fileExtension}`
         );
         uploadBytes(storage, proof)
           .then(async () => {
             console.log("Uploaded");
             try {
-             const updates : {
-                [key: string]: any
-             } = {};
+              const updates: {
+                [key: string]: any;
+              } = {};
 
               updates["amount"] = amount;
               updates["fileExtension"] = fileExtension;
+              updates["uniqueId"] = uniqueId;
 
-              await update(ref(db, `payments/${auth.currentUser!.uid}/${paymentId}`), updates);
+              await update(
+                ref(db, `payments/${auth.currentUser!.uid}/${paymentId}`),
+                updates
+              );
               dispatch({
                 title: "Success",
                 icon: "checkmark",

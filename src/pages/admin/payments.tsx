@@ -11,16 +11,14 @@ import { useEffect, useState } from "react";
 
 type statusType = "" | "pending" | "approved" | "rejected";
 const PaymentCard = ({
-  uid,
-  paymentId,
-  paymentStatus,
-  children,
+  payment,
 }: {
-  uid: string;
-  paymentId: string;
-  paymentStatus: string;
-  children?: React.ReactNode;
+  payment: {
+    [key: string]: any;
+  };
 }) => {
+  const { userId: uid, paymentId } = payment;
+  const paymentStatus = payment?.approved?.status || "pending";
   const [url, setUrl] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   async function makeThis(status: statusType) {
@@ -28,7 +26,7 @@ const PaymentCard = ({
     try {
       await set(ref(db, `payments/${uid}/${paymentId}/approved`), {
         status,
-        by: auth.currentUser!.uid
+        by: auth.currentUser!.uid,
       });
     } catch (err) {
       console.log(err);
@@ -46,20 +44,15 @@ const PaymentCard = ({
         <Button
           className="w-fit mr-2"
           onClick={() => {
-            onValue(
-              ref(db, `payments/${uid}/${paymentId}/fileExtension`),
-              (snapshot) => {
-                const storage = getStorage();
-                getDownloadURL(
-                  storageRef(
-                    storage,
-                    `paymentProof/${uid}/${paymentId}.${snapshot.val()}`
-                  )
-                ).then((url) => {
-                  setUrl(url);
-                });
-              }
-            );
+            const storage = getStorage();
+            getDownloadURL(
+              storageRef(
+                storage,
+                `paymentProof/${uid}/${paymentId}-${payment.uniqueId}.${payment.fileExtension}`
+              )
+            ).then((url) => {
+              setUrl(url);
+            });
           }}
         >
           View Payment Proof
@@ -104,28 +97,30 @@ export default function App() {
   useEffect(() => {
     onValue(ref(db, "payments"), (snapshot) => {
       console.log("Update: payments");
-      const current : {
-        [key: string] : any[]
+      const current: {
+        [key: string]: any[];
       } = {
         approved: [],
         pending: [],
         rejected: [],
       };
       console.log(snapshot.val());
-      if(!snapshot.val()) return current;
-      for(const userId in snapshot.val()) {
-        for(const paymentId in snapshot.val()[userId]) {
+      if (!snapshot.val()) return current;
+      for (const userId in snapshot.val()) {
+        for (const paymentId in snapshot.val()[userId]) {
           const payment = snapshot.val()[userId][paymentId];
-          if(!payment?.approved?.status) current.pending.push({
-            ...payment,
-            userId,
-            paymentId
-          });
-          else current[payment.approved.status].push({
-            ...payment,
-            userId,
-            paymentId
-          });
+          if (!payment?.approved?.status)
+            current.pending.push({
+              ...payment,
+              userId,
+              paymentId,
+            });
+          else
+            current[payment.approved.status].push({
+              ...payment,
+              userId,
+              paymentId,
+            });
         }
       }
       setPayments(current);
@@ -154,17 +149,14 @@ export default function App() {
         >
           Show Rejected Payments
         </Button>
-        {current ? payments[current]?.map((payment : any) => {
-          const {userId, paymentId} = payment;
-          return (
-            <PaymentCard
-              key={userId + "-" + paymentId}
-              uid={userId}
-              paymentId={paymentId}
-              paymentStatus={payment?.approved?.status || "pending"}
-            />
-          );
-        }) : null}
+        {current
+          ? payments[current]?.map((payment: any) => {
+              const { userId, paymentId } = payment;
+              return (
+                <PaymentCard key={userId + "-" + paymentId} payment={payment} />
+              );
+            })
+          : null}
       </div>
     </Dashboard>
   );

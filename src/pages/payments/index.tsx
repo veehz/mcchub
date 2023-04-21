@@ -12,70 +12,39 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 const PaymentCard = ({
+  payment,
   paymentId,
-  fileExtension,
-  fetchStatus,
-  children,
 }: {
+  payment: any;
   paymentId: string;
-  fileExtension: string;
-  fetchStatus?: boolean;
-  children?: React.ReactNode;
 }) => {
   const [url, setUrl] = useState<any>(null);
-  const fetched = useRef<boolean>(false);
-  const [forceFetchStatus, setForceFetchStatus] = useState<boolean>(false);
+  const color = useRef<"" | "bg-red-100" | "bg-yellow-100" | "bg-green-100">(
+    ""
+  );
+  // const [msg, setMsg] = useState<any>("");
+  const msg = useRef<string>("");
 
-  const [color, setColor] = useState<
-    "" | "bg-red-100" | "bg-yellow-100" | "bg-green-100"
-  >("");
-  const [msg, setMsg] = useState<any>("");
-
-  useEffect(() => {
-    if (fetched.current) return;
-    if (!fetchStatus && !forceFetchStatus) return;
-    fetched.current = true;
-    console.log("fetching data for " + paymentId);
-    onValue(
-      ref(db, `payments/${auth.currentUser!.uid}/${paymentId}`),
-      (snapshot) => {
-        console.log(snapshot.val());
-        if (!snapshot.exists()) {
-          setMsg(
-            "Payment isn't found. There is an error. Please contact us immediately."
-          );
-          setColor("bg-red-100");
-          return;
-        }
-
-        if (!snapshot.val()?.approved?.status || snapshot.val().approved.status == "pending") {
-          setMsg("Pending Approval.");
-          setColor("bg-yellow-100");
-        } else if (snapshot.val().approved.status == "approved") {
-          setMsg("Payment status is approved.");
-          setColor("bg-green-100");
-        } else if (snapshot.val().approved.status == "rejected") {
-          setMsg(
-            "Payment status is rejected. You may contact us for more details."
-          );
-          setColor("bg-red-100");
-        }
-      },
-      {
-        onlyOnce: true,
-      }
-    );
-  }, [fetchStatus, forceFetchStatus, paymentId]);
+  if (!payment?.approved?.status || payment.approved.status == "pending") {
+    msg.current = "Pending Approval.";
+    color.current = "bg-yellow-100";
+  } else if (payment.approved.status == "approved") {
+    msg.current = "Payment status is approved.";
+    color.current = "bg-green-100";
+  } else if (payment.approved.status == "rejected") {
+    msg.current =
+      "Payment status is rejected. You may contact us for more details.";
+    color.current = "bg-red-100";
+  }
 
   return (
     <div
-      className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4 " + color}
-      onClick={() => {
-        setForceFetchStatus(true);
-      }}
+      className={
+        "rounded-lg overflow-hidden shadow-lg p-4 mb-4 " + color.current
+      }
     >
       <div className="font-bold text-xl mb-2">#{paymentId}</div>
-      <div className="text-gray-700 text-base mb-2">{msg}</div>
+      <div className="text-gray-700 text-base mb-2">{msg.current}</div>
       <Button
         className="w-fit"
         onClick={() => {
@@ -83,9 +52,9 @@ const PaymentCard = ({
           getDownloadURL(
             storageRef(
               storage,
-              `paymentProof/${
-                auth.currentUser!.uid
-              }/${paymentId}.${fileExtension}`
+              `paymentProof/${auth.currentUser!.uid}/${paymentId}-${
+                payment.uniqueId
+              }.${payment.fileExtension}`
             )
           ).then((url) => {
             setUrl(url);
@@ -101,33 +70,24 @@ const PaymentCard = ({
   );
 };
 
-export default function Guide() {
-  const [fetchStatus, setFetchStatus] = useState<boolean>(false);
-
-  const [payments, setPayments] = useState<any[]>([]);
-  const [loaded, setLoaded] = useState<boolean>(false);
+export default function App() {
+  const [payments, setPayments] = useState<{
+    [key: string]: any;
+  }>({});
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      if (loaded || !user) return;
-      setLoaded(true);
+      if(!user) return;
       onValue(
         ref(db, `payments/${user.uid}`),
         (snapshot) => {
-          if (snapshot.val()) {
-            setPayments(
-              Object.keys(snapshot.val()).map((str) => [
-                str,
-                snapshot.val()[str].fileExtension,
-              ])
-            );
-          }
+          setPayments(snapshot.val() || {});
         },
         {
           onlyOnce: true,
         }
       );
     });
-  });
+  }, []);
 
   return (
     <Dashboard>
@@ -137,21 +97,11 @@ export default function Guide() {
             <span className="font-extrabold">+</span>&nbsp;Add Payment
           </Button>
         </Link>
-        <Button
-          className="mx-4 my-2 w-max"
-          onClick={() => setFetchStatus(true)}
-        >
-          Fetch All Payment Status
-        </Button>
       </div>
       <div className="flex flex-col">
-        {payments.map(([str, fe]) => (
-          <div key={str} className="w-full p-4">
-            <PaymentCard
-              paymentId={str}
-              fetchStatus={fetchStatus}
-              fileExtension={fe}
-            />
+        {Object.keys(payments).map((id) => (
+          <div key={id} className="w-full p-4">
+            <PaymentCard payment={payments[id]} paymentId={id} />
           </div>
         ))}
       </div>
