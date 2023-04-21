@@ -156,24 +156,25 @@ const UserCard = ({
       <div className="flex flex-wrap">
         <Button className="mx-2 my-1">Edit User</Button>
         {role == "teacher" || role == "parent" ? (
-          <Button className="mx-2 my-1" onClick={() => setViewPayments(!viewPayments)}>
+          <Button
+            className="mx-2 my-1"
+            onClick={() => setViewPayments(!viewPayments)}
+          >
             {viewPayments ? "Hide Payments" : "View Payments"}
           </Button>
         ) : null}
       </div>
       {payments && viewPayments
         ? Object.keys(payments).map((paymentId) => (
-            <div>
-              <PaymentCard
-                key={userId + "-" + paymentId}
-                payment={{
-                  ...payments[paymentId],
-                  userId,
-                  paymentId,
-                }}
-                showUid={false}
-              />
-            </div>
+            <PaymentCard
+              key={userId + "-" + paymentId}
+              payment={{
+                ...payments[paymentId],
+                userId,
+                paymentId,
+              }}
+              showUid={false}
+            />
           ))
         : null}
     </div>
