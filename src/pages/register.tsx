@@ -44,7 +44,6 @@ export default function Register() {
           [key: string]: any;
         } = {};
         updates["role/" + userCredential.user.uid] = data.type;
-        updates["admin/role/" + userCredential.user.uid] = data.type;
         updates["users/" + userCredential.user.uid + "/email"] = data.email;
         try {
           await update(ref(db), updates);
