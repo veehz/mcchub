@@ -24,6 +24,7 @@ const PaymentCard = ({
   const [url, setUrl] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   async function makeThis(status: statusType) {
+    console.log("paymentStatus", paymentStatus);
     setIsLoading(true);
     try {
       const updates: {
@@ -32,12 +33,14 @@ const PaymentCard = ({
       updates[`payments/${uid}/${paymentId}/approved`] = status;
       updates[`admin/payments/${paymentStatus}/${uid}-${paymentId}`] = null;
       updates[`admin/payments/${status}/${uid}-${paymentId}`] = true;
+      console.log(JSON.stringify(updates, null, 2));
       await update(ref(db), updates);
     } catch (err) {
       console.log(err);
     }
     setIsLoading(false);
   }
+
   return (
     <div className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4 w-full"}>
       <div className="font-bold text-xl mb-2">
@@ -120,7 +123,7 @@ export default function App() {
     });
   }, []);
 
-  const [current, setCurrent] = useState<any>({});
+  const [current, setCurrent] = useState<string>("");
   return (
     <Dashboard>
       <div className="flex flex-col md:flex-row md:flex-wrap">
@@ -147,7 +150,9 @@ export default function App() {
             ? approvedPayments
             : current == "pending"
             ? pendingPayments
-            : rejectedPayments
+            : current == "rejected"
+            ? rejectedPayments
+            : {}
         ).map((key) => {
           const [uid, paymentId] = key.split("-");
           return (
