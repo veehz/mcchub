@@ -301,7 +301,7 @@ export default function App() {
                 </RadioInputList>
               </InputList>
 
-              <Button props={{ type: "submit" }} isLoading={isLoading}>
+              <Button props={{ type: "submit" }} isLoading={isLoading} full={true}>
                 Update Details
               </Button>
             </div>

@@ -318,6 +318,7 @@ export default function Profile() {
                 : null}
 
               <Button
+              full={true}
                 props={{ type: "submit" }}
                 isLoading={isLoading}
                 disabled={!allowInput}

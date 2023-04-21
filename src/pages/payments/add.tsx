@@ -260,6 +260,7 @@ export default function App() {
               </div>
             </div>
             <Button
+            full={true}
               props={{ type: "submit" }}
               isLoading={isLoading}
               disabled={!allowInput}

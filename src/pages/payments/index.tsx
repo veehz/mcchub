@@ -46,7 +46,6 @@ const PaymentCard = ({
       <div className="font-bold text-xl mb-2">#{paymentId}</div>
       <div className="text-gray-700 text-base mb-2">{msg.current}</div>
       <Button
-        className="w-fit"
         onClick={() => {
           const storage = getStorage();
           getDownloadURL(
@@ -93,7 +92,7 @@ export default function App() {
     <Dashboard>
       <div className="flex flex-wrap">
         <Link href="/payments/add">
-          <Button className="mx-4 my-2 w-max text-center">
+          <Button className="mx-4 my-2 text-center">
             <span className="font-extrabold">+</span>&nbsp;Add Payment
           </Button>
         </Link>

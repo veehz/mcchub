@@ -197,7 +197,7 @@ export default function Profile() {
             Object.keys(originalDetails).length &&
             !originalDetails.nric ? (
               <Link href="/profile/bind-nric">
-                <Button>
+                <Button full={true}>
                   Bind your account to an NRIC Number/Passport Number
                 </Button>
               </Link>
@@ -360,7 +360,7 @@ export default function Profile() {
                 })}
               </InputList>
 
-              <Button props={{ type: "submit" }} isLoading={isLoading}>
+              <Button props={{ type: "submit" }} isLoading={isLoading} full={true}>
                 Update Details
               </Button>
             </div>

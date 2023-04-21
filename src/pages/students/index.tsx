@@ -68,7 +68,7 @@ const StudentCard = ({
       </div>
       <div className="text-gray-700 text-base mb-2">{msg}</div>
       <Link href={`/students/edit?id=${nric}`}>
-        <Button className={showButton ? "" : "hidden"}>Edit Profile</Button>
+        <Button full={true} className={showButton ? "" : "hidden"}>Edit Profile</Button>
       </Link>
     </div>
   );
@@ -100,12 +100,12 @@ export default function App() {
     <Dashboard>
       <div className="flex flex-wrap">
         <Link href="/students/add">
-          <Button className="mx-4 my-2 w-max text-center">
+          <Button className="mx-4 my-2 text-center">
             <span className="font-extrabold">+</span>&nbsp;Add Student
           </Button>
         </Link>
         <Button
-          className="mx-4 my-2 w-max"
+          className="mx-4 my-2"
           onClick={() => setFetchStatus(true)}
         >
           Fetch All Student Status

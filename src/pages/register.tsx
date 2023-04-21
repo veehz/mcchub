@@ -216,7 +216,7 @@ export default function Register() {
         </div>
 
         <div>
-          <Button props={{ type: "submit" }} isLoading={isLoading}>
+          <Button props={{ type: "submit" }} isLoading={isLoading} full={true}>
             Register
           </Button>
         </div>

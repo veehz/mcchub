@@ -133,7 +133,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <Button props={{ type: "submit" }} isLoading={isLoading}>
+        <Button full={true} props={{ type: "submit" }} isLoading={isLoading}>
           Sign in
         </Button>
       </form>

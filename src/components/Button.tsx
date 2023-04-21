@@ -4,6 +4,7 @@ export default function Button({
   props = {},
   className = "",
   flex = true,
+  full = false,
   disabled = false,
   onClick,
 }: {
@@ -11,6 +12,7 @@ export default function Button({
   isLoading?: boolean;
   props?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   className?: string;
+  full?: boolean;
   flex?: boolean;
   disabled?: boolean;
   onClick?: () => void;
@@ -19,12 +21,13 @@ export default function Button({
     <button
       onClick={onClick}
       className={
-        "group relative w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white hover:opacity-75 " +
+        "group relative justify-center rounded-md px-3 py-2 text-sm font-semibold text-white hover:opacity-75 " +
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
         "disabled:opacity-75 " +
         (className.includes("bg-") ? "" : "bg-indigo-600 ") +
-        className +
-        (flex ? " flex" : "")
+        (full ? "w-full " : "") +
+        (flex ? "flex " : "") +
+        className
       }
       disabled={isLoading || disabled}
       {...props}

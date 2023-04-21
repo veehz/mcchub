@@ -58,7 +58,7 @@ export default function Dashboard({
             : [
                 // admin
                 ["Dashboard", "/admin"],
-                ["Students", "/admin/students"],
+                ["Users", "/admin/users"],
                 ["Payments", "/admin/payments"],
               ])
         }

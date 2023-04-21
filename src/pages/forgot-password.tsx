@@ -94,7 +94,7 @@ export default function ForgotPassword() {
         </div>
 
         <div>
-          <Button props={{ type: "submit" }} isLoading={isLoading}>
+          <Button full={true} props={{ type: "submit" }} isLoading={isLoading}>
             Reset Password
           </Button>
         </div>

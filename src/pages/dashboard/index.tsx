@@ -155,6 +155,7 @@ export default function Home() {
               </div>
               {showVerifyEmailButton ? (
                 <Button
+                  full={true}
                   onClick={() => {
                     if (auth.currentUser)
                       sendEmailVerification(auth.currentUser)
@@ -172,13 +173,13 @@ export default function Home() {
 
               {showBindICButton ? (
                 <Link href="/profile/bind-nric/">
-                  <Button>Bind Your IC Number</Button>
+                  <Button full={true}>Bind Your IC Number</Button>
                 </Link>
               ) : null}
 
               {showCompleteProfileButton ? (
                 <Link href="/profile">
-                  <Button>Complete Your Profile</Button>
+                  <Button full={true}>Complete Your Profile</Button>
                 </Link>
               ) : null}
               {!showVerifyEmailButton &&
@@ -198,7 +199,7 @@ export default function Home() {
                 <div className="text-red-500">Remember to add students!</div>
               ) : null}
               <Link href="/students">
-                <Button>Add Students</Button>
+                <Button full={true}>Add Students</Button>
               </Link>
             </Card>
           ) : null}
@@ -236,9 +237,9 @@ export default function Home() {
           <Card title="Important Links">
             This is a description of my card. It can be multiple lines long.
             <Link href="/guide">
-              <Button>
-                <p>Guide to use MCC Hub.</p>
-                <p>This link actually works.</p>
+              <Button full={true}>
+                <div>Guide to use MCC Hub.</div>{" "}
+                <div>This link actually works.</div>
               </Button>
             </Link>
           </Card>
