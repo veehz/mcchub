@@ -10,12 +10,14 @@ import {
 import { useEffect, useState } from "react";
 
 type statusType = "" | "pending" | "approved" | "rejected";
-const PaymentCard = ({
+export const PaymentCard = ({
   payment,
+  showUid = true,
 }: {
   payment: {
     [key: string]: any;
   };
+  showUid?: boolean;
 }) => {
   const { userId: uid, paymentId } = payment;
   const paymentStatus = payment?.approved?.status || "pending";
@@ -37,7 +39,7 @@ const PaymentCard = ({
   return (
     <div className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4 w-full"}>
       <div className="font-bold text-xl mb-2">
-        {uid}: #{paymentId}
+        {showUid ? `${uid}: ` : null} #{paymentId}
       </div>
       {/* <div className="text-gray-700 text-base mb-2">{msg}</div> */}
       <div className="flex">

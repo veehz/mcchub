@@ -4,6 +4,7 @@ import TextInput from "@/components/FormComponents/TextInput";
 import { db } from "@/firebase";
 import { onValue, ref } from "firebase/database";
 import { useEffect, useState } from "react";
+import { PaymentCard } from "../payments";
 
 const UserCard = ({
   userId,
@@ -28,6 +29,8 @@ const UserCard = ({
     .split(" ")
     .map((x) => x.toLowerCase().trim())
     .filter((x) => x.length > 0);
+
+  const [viewPayments, setViewPayments] = useState<boolean>(false);
 
   if (searchKey) {
     hidden = true;
@@ -140,7 +143,9 @@ const UserCard = ({
                 >
                   {users[userId]!.nric}{" "}
                   {nricData[users[userId]!.nric]?.manager
-                    ? `(manager: ${users[nricData[users[userId]!.nric]!.manager].email})`
+                    ? `(manager: ${
+                        users[nricData[users[userId]!.nric]!.manager].email
+                      })`
                     : null}
                 </span>
               </div>
@@ -151,9 +156,26 @@ const UserCard = ({
       <div className="flex flex-wrap">
         <Button className="mx-2 my-1">Edit User</Button>
         {role == "teacher" || role == "parent" ? (
-          <Button className="mx-2 my-1">View Payments</Button>
+          <Button className="mx-2 my-1" onClick={() => setViewPayments(!viewPayments)}>
+            {viewPayments ? "Hide Payments" : "View Payments"}
+          </Button>
         ) : null}
       </div>
+      {payments && viewPayments
+        ? Object.keys(payments).map((paymentId) => (
+            <div>
+              <PaymentCard
+                key={userId + "-" + paymentId}
+                payment={{
+                  ...payments[paymentId],
+                  userId,
+                  paymentId,
+                }}
+                showUid={false}
+              />
+            </div>
+          ))
+        : null}
     </div>
   );
 };
