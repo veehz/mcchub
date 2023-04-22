@@ -8,6 +8,21 @@ import { PaymentCard } from "../payments";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+const sum = (a: number, b: number) => a + b;
+const reduceMethods: {
+  [key: string]: (a: boolean, b: boolean) => boolean;
+} = {
+  and: (a: boolean, b: boolean) => a && b,
+  or: (a: boolean, b: boolean) => a || b,
+  xor: (a: boolean, b: boolean) => a != b,
+};
+const reduceMethodsDefaultValues: {
+  [key: string]: boolean;
+} = {
+  and: true,
+  or: false,
+  xor: false,
+};
 const UserCard = ({
   userId,
   users,
@@ -25,33 +40,87 @@ const UserCard = ({
   payments: any;
   searchKey: string;
 }) => {
-  let hidden = false;
-  let keys = searchKey
-    .trim()
-    .split(" ")
-    .map((x) => x.toLowerCase().trim())
-    .filter((x) => x.length > 0);
+  const [hidden, setHidden] = useState<boolean>(false);
 
   const [viewPayments, setViewPayments] = useState<boolean>(false);
+  useEffect(() => {
+    if (searchKey) {
+      setHidden(true);
+      const keys = searchKey
+        .trim()
+        .split(" ")
+        .map((x) => x.toLowerCase().trim())
+        .filter((x) => x.length > 0);
 
-  if (searchKey) {
-    hidden = true;
-    for (let k of keys) {
-      if (userId.toLowerCase().includes(k)) hidden = false;
-    }
-    for (let k of keys) {
-      if (role.toLowerCase().includes(k)) hidden = false;
-    }
-    for (let key of Object.keys(users[userId])) {
-      if (!hidden) break;
-      for (let k of keys) {
-        if (users[userId][key].toLowerCase().includes(k)) {
-          hidden = false;
-          break;
+      const rawSearchKeys = [];
+      const options: {
+        [key: string]: string;
+      } = {};
+
+      for (const k of keys) {
+        if (k.includes(":")) {
+          const [key, value] = k.split(":");
+          options[key] = value;
+        } else {
+          rawSearchKeys.push(k);
         }
       }
+
+      const tfarray = [];
+
+      for (const k of rawSearchKeys) {
+        let found = false;
+        for (const key of Object.keys(users[userId])) {
+          if (users[userId][key].toLowerCase().includes(k)) {
+            found = true;
+            break;
+          }
+        }
+        tfarray.push(found);
+      }
+
+      // options
+      if (options["due"] == "true") {
+        const needToPay =
+          Object.keys(managedStudents).length *
+          parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0");
+        const approvedPayment = Object.keys(payments)
+          .filter((key) => payments[key]?.approved?.status == "approved")
+          .map((key) => parseFloat(payments[key].amount))
+          .reduce(sum, 0);
+
+        tfarray.push(needToPay > approvedPayment);
+      }
+
+      if (options["role"]) {
+        tfarray.push(role == options["role"]);
+      }
+
+      if (options["managerof"]) {
+        tfarray.push(options["managerof"] in managedStudents);
+      }
+
+      let verdict = tfarray.reduce(
+        reduceMethods.and,
+        reduceMethodsDefaultValues.and
+      );
+
+      if (options["searchtype"] && options["searchtype"] in reduceMethods) {
+        verdict = tfarray.reduce(
+          reduceMethods[options["searchtype"]],
+          reduceMethodsDefaultValues[options["searchtype"]]
+        );
+      }
+
+      if (options["not"] == "true") {
+        verdict = !verdict;
+      }
+
+      setHidden(!verdict);
+    } else {
+      setHidden(false);
     }
-  }
+  }, [searchKey, payments, managedStudents, role, userId, users]);
 
   function capitalize(str: string) {
     const words = str.split(" ");
@@ -115,6 +184,20 @@ const UserCard = ({
                   : null}
                 )
               </div>
+              <div>
+                <span className="font-bold">Need to pay:</span>{" "}
+                {Object.keys(managedStudents).length *
+                  parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0")}
+              </div>
+              <div>
+                <span className="font-bold">Approved Payment:</span>{" "}
+                {Object.keys(payments)
+                  .filter(
+                    (key) => payments[key]?.approved?.status == "approved"
+                  )
+                  .map((key) => parseFloat(payments[key].amount))
+                  .reduce(sum, 0)}
+              </div>
             </div>
           ) : null}
 
@@ -141,11 +224,16 @@ const UserCard = ({
                         <span
                           className="text-blue-600 font-bold hover:opacity-75 cursor-pointer"
                           onClick={() => {
-                            const updates : {
+                            const updates: {
                               [key: string]: any;
                             } = {};
-                            updates[`managedStudents/${userId}/${studentId}`] = null;
-                            updates[`nric/${users[nricData[studentId].student].nric}/manager`] = null;
+                            updates[`managedStudents/${userId}/${studentId}`] =
+                              null;
+                            updates[
+                              `nric/${
+                                users[nricData[studentId].student].nric
+                              }/manager`
+                            ] = null;
                             update(ref(db), updates);
                           }}
                         >
@@ -217,6 +305,8 @@ const UserCard = ({
 export default function App() {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
+
+  const [showSearchGuide, setShowSearchGuide] = useState<boolean>(false);
 
   const [users, setUsers] = useState<any>({});
   const [roles, setRoles] = useState<any>({});
@@ -291,6 +381,36 @@ export default function App() {
               },
             }}
           />
+          <div
+            className="mx-2 text-sm underline text-blue-500 cursor-pointer hover:opacity-90"
+            onClick={() => {
+              setShowSearchGuide(!showSearchGuide);
+            }}
+          >
+            Advanced Search Guide
+          </div>
+          <div className="mx-2 text-sm m-2 p-2 rounded-md border border-solid border-black" hidden={!showSearchGuide}>
+            <div>
+              <span className="font-mono bg-gray-200">due:true</span>{" "}
+              shows teachers whose approved payments are not enough to cover the registration fees.
+            </div>
+            <div>
+              <span className="font-mono bg-gray-200">role:student | parent | teacher | admin</span>{" "}
+              shows users with the respective role.
+            </div>
+            <div>
+              <span className="font-mono bg-gray-200">managerof:[nric]</span>{" "}
+              shows users with [nric] as their managed student.
+            </div>
+            <div>
+              <span className="font-mono bg-gray-200">searchtype:and | or | xor</span>{" "}
+              determines the search type (default: and)
+            </div>
+            <div>
+              <span className="font-mono bg-gray-200">not:true</span>{" "}
+              inverts the search results
+            </div>
+          </div>
           <div className="flex flex-col">
             {Object.keys(users).map((id: string) => (
               <UserCard
@@ -299,8 +419,8 @@ export default function App() {
                 users={users}
                 nricData={nricData}
                 role={roles[id]}
-                managedStudents={managedStudents[id]}
-                payments={payments[id]}
+                managedStudents={managedStudents[id] || {}}
+                payments={payments[id] || {}}
                 searchKey={search}
               />
             ))}
