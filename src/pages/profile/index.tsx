@@ -1,4 +1,3 @@
-/* eslint-disable */
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
 import { useEffect, useReducer, useState } from "react";

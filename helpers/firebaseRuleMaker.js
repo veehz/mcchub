@@ -87,15 +87,18 @@ const rules = {
 
       nationality: { ".write": once() },
       nric: {
-        ".write": and(
-          once(),
-          `data.parent().child('nationality').exists()`,
-          or(
-            and(
-              `data.parent().child('nationality').val() == 'Malaysian'`,
-              `data.val().matches(/[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/)`
-            ),
-            `data.parent().child('nationality').val() != 'Malaysian'`
+        ".write": or(
+          isRole("admin"),
+          and(
+            once(),
+            `data.parent().child('nationality').exists()`,
+            or(
+              and(
+                `data.parent().child('nationality').val() == 'Malaysian'`,
+                `data.val().matches(/[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/)`
+              ),
+              `data.parent().child('nationality').val() != 'Malaysian'`
+            )
           )
         ),
       },

@@ -5,6 +5,8 @@ import { db } from "@/firebase";
 import { onValue, ref } from "firebase/database";
 import { useEffect, useState } from "react";
 import { PaymentCard } from "../payments";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const UserCard = ({
   userId,
@@ -51,6 +53,14 @@ const UserCard = ({
     }
   }
 
+  function capitalize(str: string) {
+    const words = str.split(" ");
+    for (let i = 0; i < words.length; i++) {
+      words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+    }
+    return words.join(" ");
+  }
+
   return (
     <div
       className={
@@ -63,13 +73,18 @@ const UserCard = ({
       </div>
       <div className="text-gray-700 text-base mb-2">
         <div className="flex flex-col">
-          <div>uid: {userId}</div>
-          <div>role: {role}</div>
+          <div>
+            <span className="font-bold">User ID</span>: {userId}
+          </div>
+          <div>
+            <span className="font-bold">Role</span>: {role}
+          </div>
           {Object.keys(users[userId])
             .filter((key) => !["email", "name", "nric"].includes(key))
             .map((key) => (
               <div key={key}>
-                {key}: {users[userId][key]}
+                <span className="font-bold">{capitalize(key)}</span>:{" "}
+                {users[userId][key]}
               </div>
             ))}
 
@@ -154,7 +169,9 @@ const UserCard = ({
         </div>
       </div>
       <div className="flex flex-wrap">
-        <Button className="mx-2 my-1">Edit User</Button>
+        <Link href={{ pathname: "/admin/users/edit", query: { id: userId } }}>
+          <Button className="mx-2 my-1">Edit User</Button>
+        </Link>
         {role == "teacher" || role == "parent" ? (
           <Button
             className="mx-2 my-1"
@@ -226,8 +243,11 @@ export default function App() {
     });
   }
 
+  const router = useRouter();
   useEffect(() => {
-    console.log(search);
+    if (router?.query?.fetch) {
+      fetchUsers();
+    }
   });
 
   return (
