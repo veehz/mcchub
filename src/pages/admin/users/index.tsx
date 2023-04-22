@@ -2,7 +2,7 @@ import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
 import TextInput from "@/components/FormComponents/TextInput";
 import { db } from "@/firebase";
-import { onValue, ref } from "firebase/database";
+import { onValue, ref, update } from "firebase/database";
 import { useEffect, useState } from "react";
 import { PaymentCard } from "../payments";
 import Link from "next/link";
@@ -122,10 +122,10 @@ const UserCard = ({
           {role == "teacher" || role == "parent" ? (
             <div>
               <div className="font-bold">
-                Students: {Object.keys(managedStudents).length}
+                Students: {Object.keys(managedStudents || {}).length}
               </div>
               <div className="flex flex-col">
-                {Object.keys(managedStudents).map((studentId) => (
+                {Object.keys(managedStudents || {}).map((studentId) => (
                   <div
                     key={studentId}
                     className={
@@ -136,7 +136,23 @@ const UserCard = ({
                   >
                     {studentId}{" "}
                     {nricData[studentId]?.student ? (
-                      <span>({users[nricData[studentId].student].email})</span>
+                      <div>
+                        ({users[nricData[studentId].student].email},{" "}
+                        <span
+                          className="text-blue-600 font-bold hover:opacity-75 cursor-pointer"
+                          onClick={() => {
+                            const updates : {
+                              [key: string]: any;
+                            } = {};
+                            updates[`managedStudents/${userId}/${studentId}`] = null;
+                            updates[`nric/${users[nricData[studentId].student].nric}/manager`] = null;
+                            update(ref(db), updates);
+                          }}
+                        >
+                          Unbind
+                        </span>
+                        )
+                      </div>
                     ) : null}
                   </div>
                 ))}
