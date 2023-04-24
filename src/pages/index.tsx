@@ -50,6 +50,14 @@ export default function LoginLanding() {
         {router?.query?.error == "not-logged-in" &&
           "You must be logged in to view that page."}
       </div>
+
+      {process.env.NEXT_PUBLIC_SITE_MESSAGE ? (
+        <div
+          className="text-center text-lg max-w-lg mx-auto"
+          dangerouslySetInnerHTML={{ __html: process.env.NEXT_PUBLIC_SITE_MESSAGE}}
+        ></div>
+      ) : null}
+
     </AuthLayout>
   );
 }
