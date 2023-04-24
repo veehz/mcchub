@@ -89,7 +89,7 @@ export default function App() {
   }, []);
 
   return (
-    <Dashboard>
+    <Dashboard title="Payments">
       <div className="flex flex-wrap">
         <Link href="/payments/add">
           <Button className="mx-4 my-2 text-center">

@@ -147,7 +147,7 @@ export default function App() {
 
   const [current, setCurrent] = useState<string>("");
   return (
-    <Dashboard>
+    <Dashboard title="Payments">
       <div className="flex flex-col md:flex-row md:flex-wrap">
         <Button
           className="md:w-fit md:mx-2 my-2"

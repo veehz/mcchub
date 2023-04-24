@@ -357,7 +357,7 @@ export default function App() {
   });
 
   return (
-    <Dashboard>
+    <Dashboard title="Users">
       <div className="place-content-center w-full">
         <Button
           className={"mx-auto" + (loaded ? " hidden" : "")}

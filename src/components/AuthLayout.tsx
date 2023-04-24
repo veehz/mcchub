@@ -1,6 +1,7 @@
 import Image from "next/image";
 import mccLogo from "@/../public/mcc.svg";
 import Link from "next/link";
+import Head from "next/head";
 
 export default function AuthLayout({
   title,
@@ -11,6 +12,9 @@ export default function AuthLayout({
 }) {
   return (
     <div className="h-screen w-screen bg-gradient-radial from-white via-white to-blue-200">
+      <Head>
+        <title key="title" lang="en">{title ? `${title} | ` : null}MCC Hub</title>
+      </Head>
       <div className="min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full">
           <div>

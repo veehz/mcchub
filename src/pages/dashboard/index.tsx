@@ -141,7 +141,7 @@ export default function Home() {
   });
 
   return (
-    <Dashboard>
+    <Dashboard title="Dashboard">
       <div className="flex flex-col md:flex-row md:justify-between">
         <div className="w-full md:w-1/3 px-2">
           {/* content for first column */}

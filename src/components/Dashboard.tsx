@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 import { onValue, ref } from "firebase/database";
+import Head from "next/head";
 
 export default function Dashboard({
+  title,
   children,
   pages,
   rightPages,
 }: {
+  title?: string;
   children: React.ReactNode;
   pages?: Array<[string, string]>;
   rightPages?: Array<[string, string]>;
@@ -44,6 +47,9 @@ export default function Dashboard({
 
   return (
     <div>
+      <Head>
+        <title key="title" lang="en">{title ? `${title} | ` : null}MCC Hub</title>
+      </Head>
       <Nav
         pages={
           pages ||

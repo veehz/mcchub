@@ -178,7 +178,7 @@ export default function Profile() {
   };
 
   return (
-    <Dashboard>
+    <Dashboard title="Profile">
       <div className="flex min-h-full items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full space-y-8 max-w-md">
           <div>

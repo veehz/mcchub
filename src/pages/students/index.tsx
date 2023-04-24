@@ -97,7 +97,7 @@ export default function App() {
   }, []);
 
   return (
-    <Dashboard>
+    <Dashboard title="Students">
       <div className="flex flex-wrap">
         <Link href="/students/add">
           <Button className="mx-4 my-2 text-center">
