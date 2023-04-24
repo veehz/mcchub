@@ -110,13 +110,6 @@ export default function App() {
       });
   };
 
-  function mySetValue(key: string, value: string | undefined) {
-    if (!value) return;
-    const x = key as keyof Profile;
-    console.log(x, value);
-    setValue(x, value);
-  }
-
   const [runOnce, setRunOnce] = useState<boolean>(false);
 
   useEffect(() => {
@@ -150,7 +143,7 @@ export default function App() {
             console.log(snapshot.val());
             for (const key in snapshot.val()) {
               const x = key as keyof Profile;
-              mySetValue(key, snapshot.val()[x]);
+              setValue(x, snapshot.val()[x]);
             }
             setAllowInput(true);
           },

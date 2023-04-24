@@ -116,7 +116,6 @@ export default function Home() {
             onValue(
               ref(db, "payments/" + user!.uid),
               (snapshot) => {
-                console.log("snapshot", snapshot.val());
                 if (snapshot.exists()) {
                   for (const key in snapshot.val()) {
                     if (snapshot.val()[key].approved)

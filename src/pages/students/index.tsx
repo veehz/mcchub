@@ -25,7 +25,6 @@ const StudentCard = ({
     if (fetched.current) return;
     if (!fetchStatus && !forceFetchStatus) return;
     fetched.current = true;
-    console.log("fetching data for " + nric);
     onValue(
       ref(db, "nric/" + nric + "/student"),
       (snapshot) => {
@@ -84,7 +83,6 @@ export default function App() {
       onValue(
         ref(db, "managedStudents/" + user.uid),
         (snapshot) => {
-          console.log("snapshot", snapshot.val());
           if (snapshot.val()) {
             setStudents(Object.keys(snapshot.val()));
           }

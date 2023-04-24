@@ -114,7 +114,6 @@ export default function App() {
   const [payments, setPayments] = useState<any>({});
   useEffect(() => {
     onValue(ref(db, "payments"), (snapshot) => {
-      console.log("Update: payments");
       const current: {
         [key: string]: any[];
       } = {
@@ -122,7 +121,7 @@ export default function App() {
         pending: [],
         rejected: [],
       };
-      console.log(snapshot.val());
+      console.log("Update: payments", snapshot.val());
       if (!snapshot.val()) return current;
       for (const userId in snapshot.val()) {
         for (const paymentId in snapshot.val()[userId]) {

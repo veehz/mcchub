@@ -76,13 +76,6 @@ export default function App() {
       });
   };
 
-  function mySetValue(key: string, value: string | undefined) {
-    if (!value) return;
-    const x = key as keyof StudentProfile;
-    console.log(x, value);
-    setValue(x, value);
-  }
-
   const [runOnce, setRunOnce] = useState<boolean>(false);
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -95,7 +88,6 @@ export default function App() {
       onValue(
         ref(db, `nric/${id}/student`),
         (snapshot) => {
-          console.log(`nric/${id}`);
           const uid = snapshot.val();
           setStudentUid(uid);
 
@@ -118,7 +110,7 @@ export default function App() {
                 )
                   continue;
                 const x = key as keyof StudentProfile;
-                mySetValue(key, snapshot.val()[x]);
+                setValue(x, snapshot.val()[x]);
               }
               setAllowInput(true);
             },

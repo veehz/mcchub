@@ -84,7 +84,6 @@ export default function App() {
         );
         uploadBytes(storage, proof)
           .then(async () => {
-            console.log("Uploaded");
             try {
               const updates: {
                 [key: string]: any;
