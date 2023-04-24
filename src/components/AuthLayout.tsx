@@ -13,7 +13,7 @@ export default function AuthLayout({
   return (
     <div className="h-screen w-screen bg-gradient-radial from-white via-white to-blue-200">
       <Head>
-        <title key="title" lang="en">{title ? `${title} | ` : null}MCC Hub</title>
+        <title key="title" lang="en">{title ? `${title} | MCC Hub` : `MCC Hub`}</title>
       </Head>
       <div className="min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full">

@@ -29,6 +29,11 @@ export default function Dashboard({
         return;
       }
       setUser(user);
+      if(process.env.NEXT_PUBLIC_FORCE_VERIFY_EMAIL == "true"){
+        if(router.pathname != "/verify-email" && !user.emailVerified){
+          router.push("/verify-email");
+        }
+      }
       onValue(
         ref(db, `role/${user!.uid}`),
         (snapshot) => {
@@ -48,7 +53,7 @@ export default function Dashboard({
   return (
     <div>
       <Head>
-        <title key="title" lang="en">{title ? `${title} | ` : null}MCC Hub</title>
+        <title key="title" lang="en">{title ? `${title} | MCC Hub` : `MCC Hub`}</title>
       </Head>
       <Nav
         pages={
