@@ -145,7 +145,10 @@ const rules = {
           and(
             once(),
             newDataIs([authUid()]),
-            or(isRole("teacher"), isRole("parent"))
+            or(isRole("teacher"), isRole("parent")),
+
+            // BEFORE REGISTRATION DEADLINE
+            `root.child('contestInfo/registrationDeadline').val() > now`
           ),
           isRole("admin")
         ),
@@ -205,6 +208,24 @@ const rules = {
     ".write": isRole("admin"),
 
     registrationDeadline: { ".validate": "newData.isNumber()" },
+
+    announcements: {
+      $announcementId: {
+        ".validate": "newData.isString()",
+        ".write": isRole("admin"),
+        title: { ".validate": "newData.isString()" },
+        content: { ".validate": "newData.isString()" },
+        $other: { ".validate": "false" },
+      },
+    },
+
+    informationTitle: {
+      ".validate": "newData.isString()",
+    },
+
+    information: {
+      ".validate": "newData.isString()",
+    }
   },
 
   $other: { ".validate": "false" },

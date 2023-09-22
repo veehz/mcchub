@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { onValue, ref } from "firebase/database";
 import { useRouter } from "next/router";
 
+import { ContestInfo } from "@/data/ContestInfo";
+
 const Card = ({
   title,
   className,
@@ -69,6 +71,10 @@ export default function Home() {
   const [studentCount, setStudentCount] = useState<number>(0);
 
   const [message, setMessage] = useState<string | string[]>([]);
+
+  const [contestInfo, setContestInfo] = useState<ContestInfo>({
+    announcements: [],
+  });
 
   const router = useRouter();
   const [paymentStatus, setPaymentStatus] = useState<{
@@ -133,6 +139,15 @@ export default function Home() {
           } else if (snapshot.val() == "admin") {
             router.push("/admin");
           }
+
+          // Get Contest Info
+          onValue(
+            ref(db, "contestInfo"),
+            (snapshot) => {
+              if (snapshot.exists()) setContestInfo(snapshot.val());
+            },
+            { onlyOnce: true }
+          );
         },
         { onlyOnce: true }
       );
@@ -200,6 +215,20 @@ export default function Home() {
               <Link href="/students">
                 <Button full={true}>Add Students</Button>
               </Link>
+            </Card>
+          ) : null}
+
+          {["teacher", "parent"].includes(role) &&
+          contestInfo?.registrationDeadline ? (
+            <Card title="Registration Deadline">
+              {new Date(contestInfo.registrationDeadline).toLocaleDateString(
+                "en-GB",
+                {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }
+              )}
             </Card>
           ) : null}
 
