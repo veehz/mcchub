@@ -8,6 +8,14 @@ import { onValue, ref } from "firebase/database";
 import { useRouter } from "next/router";
 
 import { ContestInfo } from "@/data/ContestInfo";
+import {
+  getContestInfo,
+  getManagedStudentsCount,
+  getPayments,
+  getRole,
+  getUser,
+  getUserDetails,
+} from "@/services/storage";
 
 const Card = ({
   title,
@@ -61,98 +69,69 @@ const PartCard = ({
 };
 
 export default function Home() {
+  const [message, setMessage] = useState<string | string[]>([]);
   const [showVerifyEmailButton, setShowVerifyEmailButton] =
+    useState<boolean>(false);
+  const [disableVerifyEmailButton, setDisableVerifyEmailButton] =
     useState<boolean>(false);
   const [showBindICButton, setShowBindICButton] = useState<boolean>(false);
   const [showCompleteProfileButton, setShowCompleteProfileButton] =
     useState<boolean>(false);
-
   const [role, setRole] = useState<string>("");
   const [studentCount, setStudentCount] = useState<number>(0);
 
-  const [message, setMessage] = useState<string | string[]>([]);
-
   const [contestInfo, setContestInfo] = useState<ContestInfo>({
-    announcements: [],
+    announcements: {},
   });
 
   const router = useRouter();
-  const [paymentStatus, setPaymentStatus] = useState<{
-    [key: string]: number;
-  }>({});
+  const [payments, setPayments] = useState<any>([]);
+
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (!user || role) return;
+    getUser().then(async (user) => {
+      if (!user) router.push("/");
 
-      setShowVerifyEmailButton(!user!.emailVerified);
+      getRole((role) => {
+        if (role == "admin") router.push("/admin");
+        setRole(role);
 
-      onValue(
-        ref(db, "role/" + user!.uid),
-        (snapshot) => {
-          setRole(snapshot.val());
-          if (snapshot.val() == "student") {
-            // student
-            onValue(
-              ref(db, "users/" + user!.uid + "/nric"),
-              (snapshot) => {
-                if (!snapshot.exists()) setShowBindICButton(true);
-              },
-              { onlyOnce: true }
-            );
-            onValue(
-              ref(db, "users/" + user!.uid + "/category"),
-              (snapshot) => {
-                if (!snapshot.exists()) setShowCompleteProfileButton(true);
-              },
-              { onlyOnce: true }
-            );
-          } else if (
-            snapshot.val() == "teacher" ||
-            snapshot.val() == "parent"
-          ) {
-            // manager
-            onValue(
-              ref(db, "managedStudents/" + user!.uid),
-              (snapshot) => {
-                if (snapshot.exists())
-                  setStudentCount(Object.keys(snapshot.val()).length);
-              },
-              { onlyOnce: true }
-            );
-            onValue(
-              ref(db, "payments/" + user!.uid),
-              (snapshot) => {
-                if (snapshot.exists()) {
-                  for (const key in snapshot.val()) {
-                    if (snapshot.val()[key].approved)
-                      setPaymentStatus((prev) => ({
-                        ...prev,
-                        [snapshot.val()[key].approved.status]:
-                          parseFloat(snapshot.val()[key].amount) +
-                            prev[snapshot.val()[key].approved.status] || 0,
-                      }));
-                  }
-                }
-              },
-              { onlyOnce: true }
-            );
-          } else if (snapshot.val() == "admin") {
-            router.push("/admin");
+        getUserDetails((userDetails) => {
+          if (!userDetails.nric && role == "student") {
+            setShowBindICButton(true);
           }
+          if (!userDetails.name) {
+            setShowCompleteProfileButton(true);
+          }
+        });
+      });
 
-          // Get Contest Info
-          onValue(
-            ref(db, "contestInfo"),
-            (snapshot) => {
-              if (snapshot.exists()) setContestInfo(snapshot.val());
-            },
-            { onlyOnce: true }
-          );
-        },
-        { onlyOnce: true }
-      );
+      getContestInfo((contestInfo) => {
+        setContestInfo(contestInfo);
+      });
+
+      if (!user!.emailVerified) {
+        setShowVerifyEmailButton(true);
+      }
+
+      getManagedStudentsCount((count) => {
+        console.log(count);
+        setStudentCount(count);
+      });
+
+      getPayments((payments) => {
+        const paymentsArray = [];
+        if (payments) {
+          for (const paymentId in payments) {
+            paymentsArray.push({
+              ...payments[paymentId],
+              paymentId,
+            });
+          }
+        }
+        setPayments(paymentsArray);
+      });
     });
-  });
+  }, []);
 
   return (
     <Dashboard title="Dashboard">
@@ -170,6 +149,7 @@ export default function Home() {
               {showVerifyEmailButton ? (
                 <Button
                   full={true}
+                  disabled={disableVerifyEmailButton}
                   onClick={() => {
                     if (auth.currentUser)
                       sendEmailVerification(auth.currentUser)
@@ -178,6 +158,9 @@ export default function Home() {
                         })
                         .catch((error) => {
                           setMessage(error.message);
+                        })
+                        .finally(() => {
+                          setDisableVerifyEmailButton(true);
                         });
                   }}
                 >
@@ -231,9 +214,12 @@ export default function Home() {
               )}
             </Card>
           ) : null}
-
           <Card title="Announcements">
-            This is a description of my card. It can be multiple lines long.
+            {contestInfo?.announcements?.length > 0
+              ? Object.keys(contestInfo.announcements).map((key) => (
+                  <div key={key}>{contestInfo.announcements[key]}</div>
+                ))
+              : "Any announcements will appear here."}
           </Card>
         </div>
         <div className="w-full md:w-1/3 px-2">
@@ -245,17 +231,37 @@ export default function Home() {
                   parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0")}
               </span>
             </Card>
-            <div className="bg-white rounded-lg overflow-hidden shadow-lg text-center">
-              <div className="flex">
-                <PartCard title="Accepted" splitInto={3} color="green">
-                  {paymentStatus["accepted"] || 0}
-                </PartCard>
-                <PartCard title="Pending" splitInto={3} color="yellow">
-                  {paymentStatus["pending"] || 0}
-                </PartCard>
-                <PartCard title="Rejected" splitInto={3} color="red">
-                  {paymentStatus["rejected"] || 0}
-                </PartCard>
+            <div>
+              {/* Table with three columns */}
+              <div className="container mx-auto">
+                <table className="table-auto w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left">Payment ID</th>
+                      <th className="text-left">Amount</th>
+                      <th className="text-left">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments
+                      ? payments.map((payment: any) => (
+                          <tr key={payment.paymentId}>
+                            <td className="border px-4 py-2">
+                              {payment.paymentId}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {payment.amount}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {payment.approved
+                                ? payment.approved.status
+                                : "pending"}
+                            </td>
+                          </tr>
+                        ))
+                      : null}
+                  </tbody>
+                </table>
               </div>
             </div>
           </Card>
@@ -263,53 +269,21 @@ export default function Home() {
         <div className="w-full md:w-1/3 px-2">
           {/* content for third column */}
           <Card title="Important Links">
-            This is a description of my card. It can be multiple lines long.
-            <Link href="/guide">
-              <Button full={true}>
-                <div>Guide to use MCC Hub.</div>{" "}
-                <div>This link actually works.</div>
-              </Button>
-            </Link>
+            {/* button link to https://ioimalaysia.org/ */}
+            <Button
+              full={true}
+              onClick={() => {
+                window.open("https://ioimalaysia.org/", "_blank");
+              }}
+            >
+              Malaysia Informatics and Programming Society (MIPS) Website
+            </Button>
           </Card>
-          <Card title="Important Dates">
-            This is a description of my card. It can be multiple lines long.
-            <div className="container mx-auto">
-              <table className="table-auto w-full">
-                <thead>
-                  <tr>
-                    <th className="text-left">Date</th>
-                    <th className="text-left">Event Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border px-4 py-2">April 20, 2023</td>
-                    <td className="border px-4 py-2">
-                      MCC Registration Deadline
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border px-4 py-2">April 25, 2023</td>
-                    <td className="border px-4 py-2">MCC</td>
-                  </tr>
-                  <tr>
-                    <td className="border px-4 py-2">May 25, 2023</td>
-                    <td className="border px-4 py-2">MCO Qualifying Rounds</td>
-                  </tr>
-                  <tr>
-                    <td className="border px-4 py-2">June 25, 2023</td>
-                    <td className="border px-4 py-2">
-                      MCO Training Camp and MCO
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border px-4 py-2">July 25, 2023</td>
-                    <td className="border px-4 py-2">APIO</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Card>
+          {contestInfo?.informationTitle ? (
+            <Card title={contestInfo.informationTitle}>
+              {contestInfo.information}
+            </Card>
+          ) : null}
         </div>
       </div>
     </Dashboard>
