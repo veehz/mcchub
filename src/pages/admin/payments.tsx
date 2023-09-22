@@ -23,6 +23,8 @@ export const PaymentCard = ({
   const paymentStatus = payment?.approved?.status || "pending";
   const [url, setUrl] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [viewPaymentProof, setViewPaymentProof] = useState<boolean>(false);
+
   async function makeThis(status: statusType) {
     setIsLoading(true);
     try {
@@ -47,17 +49,21 @@ export const PaymentCard = ({
           className="mx-2 my-1"
           onClick={() => {
             const storage = getStorage();
-            getDownloadURL(
-              storageRef(
-                storage,
-                `paymentProof/${uid}/${paymentId}-${payment.uniqueId}.${payment.fileExtension}`
-              )
-            ).then((url) => {
-              setUrl(url);
-            });
+            if (!url) {
+              getDownloadURL(
+                storageRef(
+                  storage,
+                  `paymentProof/${uid}/${paymentId}-${payment.uniqueId}.${payment.fileExtension}`
+                )
+              ).then((url) => {
+                setUrl(url);
+              });
+            }
+
+            setViewPaymentProof(!viewPaymentProof);
           }}
         >
-          View Payment Proof
+          {viewPaymentProof ? "Hide" : "View"} Payment Proof
         </Button>
         <Button
           className="mx-2 my-1"
@@ -104,7 +110,9 @@ export const PaymentCard = ({
         )}
       </div>
       <div className="my-4">
-        {url ? <iframe src={url} width="100%" height="500px"></iframe> : null}
+        {url && viewPaymentProof ? (
+          <iframe src={url} width="100%" height="500px"></iframe>
+        ) : null}
       </div>
     </div>
   );
