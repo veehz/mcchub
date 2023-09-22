@@ -43,6 +43,9 @@ export const PaymentCard = ({
       <div className="font-bold text-xl mb-2">
         {showUid ? `${uid}: ` : null} #{paymentId}
       </div>
+      <div className="text-gray-700 text-base mb-2">
+        Payment of: {payment?.amount}{" "}
+      </div>
       {/* <div className="text-gray-700 text-base mb-2">{msg}</div> */}
       <div className="flex">
         <Button
