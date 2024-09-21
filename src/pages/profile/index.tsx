@@ -11,6 +11,7 @@ import InputList from "@/components/FormComponents/InputList";
 import TextInput from "@/components/FormComponents/TextInput";
 import RadioInput from "@/components/FormComponents/RadioInput";
 import RadioInputList from "@/components/FormComponents/RadioInputList";
+import DateInput from "@/components/FormComponents/DateInput";
 import Link from "next/link";
 import Modal, { reducer, ModalInfo } from "@/components/Modal";
 import { useRouter } from "next/router";
@@ -28,6 +29,7 @@ interface Profile {
 
   form?: string;
   gender?: string;
+  dob?: string;
   state?: string;
   country?: string;
 
@@ -64,7 +66,8 @@ export default function Profile() {
 
       const x = key as keyof Profile;
       if ((data[x] || "") !== (originalDetails[x] || "")) {
-        updates[key as string] = data[x] ? data[x] : "";
+        let value = data[x];
+        updates[key as string] = value ? value : "";
       }
     }
     update(child(ref(db), "users/" + auth.currentUser?.uid), updates)
@@ -74,6 +77,7 @@ export default function Profile() {
         dispatch({
           hidden: false,
           title: "Profile Updated Successfully",
+          children: "",
           icon: "checkmark",
           mainText: "OK",
           mainOnClick: () => {
@@ -240,6 +244,21 @@ export default function Profile() {
                   placeholder: "School",
                   errorMsg: errors?.school?.message,
                 })}
+
+                <DateInput
+                  hook={register("dob", {
+                    validate: (value) => {
+                      if(role != "student") return true;
+                      if (!value || value.length < 1)
+                        return "Please fill in your Date of Birth.";
+                    },
+                  })}
+                  id="dob"
+                  inputName="Date of Birth"
+                  placeholder="Date of Birth"
+                  errorMsg={errors?.dob?.message}
+                />
+
                 {Input({
                   hook: register("form", {
                     validate: (value) => {
@@ -273,39 +292,6 @@ export default function Profile() {
                   placeholder: "Country (e.g. Malaysia)",
                   errorMsg: errors?.country?.message,
                 })}
-                <RadioInputList
-                  title="Category"
-                  errorMsg={errors?.category?.message}
-                >
-                  <RadioInput
-                    id="junior"
-                    hook={register("category", {
-                      validate: (value) => {
-                        if (role != "student") return true;
-                        if (!value || value.length < 1)
-                          return "Please select a category.";
-                      },
-                    })}
-                    disabled={!allowInput}
-                  >
-                    Bongsu/Junior - Form 1, 2, 3, or Primary School
-                  </RadioInput>
-                  <RadioInput
-                    id="intermediate"
-                    hook={register("category")}
-                    disabled={!allowInput}
-                  >
-                    Muda/Intermediate - Form 4, 5
-                  </RadioInput>
-                  <RadioInput
-                    id="senior"
-                    hook={register("category")}
-                    disabled={!allowInput}
-                  >
-                    Sulung/Senior - Form 6 (lower & upper), Pre-U
-                    (Matriculation, Foundation Studies, IB, A-Levels, etc.)
-                  </RadioInput>
-                </RadioInputList>
               </InputList>
 
               <InputList
@@ -352,7 +338,11 @@ export default function Profile() {
                 })}
               </InputList>
 
-              <Button props={{ type: "submit" }} isLoading={isLoading} full={true}>
+              <Button
+                props={{ type: "submit" }}
+                isLoading={isLoading}
+                full={true}
+              >
                 Update Details
               </Button>
             </div>

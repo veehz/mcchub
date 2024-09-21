@@ -33,7 +33,7 @@ const StudentCard = ({
           return;
         }
         onValue(
-          ref(db, "users/" + snapshot.val() + "/category"),
+          ref(db, "users/" + snapshot.val() + "/dob"),
           (snapshot) => {
             setShowButton(true);
             if (!snapshot.exists()) {
@@ -41,18 +41,14 @@ const StudentCard = ({
               return;
             }
             setMsg(
-              "Profile complete. Student in " + snapshot.val() + " category"
+              "Profile complete."
             );
-          },
-          {
-            onlyOnce: true,
+          }, (error) => {
+            console.error(error);
           }
         );
-      },
-      {
-        onlyOnce: true,
       }
-    );
+    )
   }, [fetchStatus, forceFetchStatus, nric]);
 
   return (

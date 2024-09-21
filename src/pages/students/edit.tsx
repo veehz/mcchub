@@ -13,12 +13,14 @@ import RadioInput from "@/components/FormComponents/RadioInput";
 
 import { useRouter } from "next/router";
 import InputList from "@/components/FormComponents/InputList";
+import DateInput from "@/components/FormComponents/DateInput";
 
 interface StudentProfile {
   name?: string;
 
   form?: string;
   gender?: string;
+  dob?: string;
   state?: string;
   country?: string;
 
@@ -158,16 +160,14 @@ export default function App() {
   };
 
   return (
-    <Dashboard title="Edit Student Profile">
+    <Dashboard title="Profile">
       <div className="flex min-h-full items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full space-y-8 max-w-md">
           <div>
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-              Student Profile
+              Your Profile
             </h2>
           </div>
-
-          <div>{message}</div>
 
           <form
             className="mt-8 space-y-6 w-full"
@@ -175,14 +175,6 @@ export default function App() {
             noValidate
           >
             <div className="space-y-2">
-              <InputList title="Identification">
-                {Input({
-                  id: "nric",
-                  inputName: "NRIC/Passport Number",
-                  placeholder: studentId,
-                  disabled: true,
-                })}
-              </InputList>
               <InputList title="Personal Information">
                 {Input({
                   hook: register("name", {
@@ -202,21 +194,21 @@ export default function App() {
                     hook={register("gender")}
                     disabled={!allowInput}
                   >
-                    Male
+                    I am a Male
                   </RadioInput>
                   <RadioInput
                     id="female"
                     hook={register("gender")}
                     disabled={!allowInput}
                   >
-                    Female
+                    I am a Female
                   </RadioInput>
                   <RadioInput
                     id="undisclosed"
                     hook={register("gender")}
                     disabled={!allowInput}
                   >
-                    Non-binary/Undisclosed
+                    I am non-binary/I do not wish to disclose my gender
                   </RadioInput>
                 </RadioInputList>
               </InputList>
@@ -228,6 +220,20 @@ export default function App() {
                   placeholder: "School",
                   errorMsg: errors?.school?.message,
                 })}
+
+                <DateInput
+                  hook={register("dob", {
+                    validate: (value) => {
+                      if (!value || value.length < 1)
+                        return "Please fill in your Date of Birth.";
+                    },
+                  })}
+                  id="dob"
+                  inputName="Date of Birth"
+                  placeholder="Date of Birth"
+                  errorMsg={errors?.dob?.message}
+                />
+
                 {Input({
                   hook: register("form", {
                     validate: (value) => {
@@ -259,41 +265,12 @@ export default function App() {
                   placeholder: "Country (e.g. Malaysia)",
                   errorMsg: errors?.country?.message,
                 })}
-                <RadioInputList
-                  title="Category"
-                  errorMsg={errors?.category?.message}
-                >
-                  <RadioInput
-                    id="junior"
-                    hook={register("category", {
-                      validate: (value) => {
-                        if (!value || value.length < 1)
-                          return "Please select a category.";
-                      },
-                    })}
-                    disabled={!allowInput}
-                  >
-                    Bongsu/Junior - Form 1, 2, 3, or Primary School
-                  </RadioInput>
-                  <RadioInput
-                    id="intermediate"
-                    hook={register("category")}
-                    disabled={!allowInput}
-                  >
-                    Muda/Intermediate - Form 4, 5
-                  </RadioInput>
-                  <RadioInput
-                    id="senior"
-                    hook={register("category")}
-                    disabled={!allowInput}
-                  >
-                    Sulung/Senior - Form 6 (lower & upper), Pre-U
-                    (Matriculation, Foundation Studies, IB, A-Levels, etc.)
-                  </RadioInput>
-                </RadioInputList>
               </InputList>
-
-              <Button props={{ type: "submit" }} isLoading={isLoading} full={true}>
+              <Button
+                props={{ type: "submit" }}
+                isLoading={isLoading}
+                full={true}
+              >
                 Update Details
               </Button>
             </div>
