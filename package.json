@@ -10,23 +10,22 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tailwindcss/forms": "^0.5.6",
-    "@types/node": "20.6.3",
-    "@types/react": "18.2.22",
-    "@types/react-dom": "18.2.7",
-    "autoprefixer": "10.4.16",
-    "eslint": "8.49.0",
-    "eslint-config-next": "13.5.2",
-    "firebase": "^10.4.0",
-    "next": "13.5.2",
-    "postcss": "8.4.30",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-hook-form": "^7.46.2",
-    "tailwindcss": "3.3.3",
-    "typescript": "5.2.2"
+    "@tailwindcss/forms": "^0.5.9",
+    "@types/node": "22.5.5",
+    "@types/react": "18.3.8",
+    "@types/react-dom": "18.3.0",
+    "autoprefixer": "10.4.20",
+    "eslint-config-next": "14.2.13",
+    "firebase": "^10.13.2",
+    "next": "14.2.13",
+    "postcss": "8.4.47",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-hook-form": "^7.53.0",
+    "tailwindcss": "3.4.12",
+    "typescript": "5.6.2"
   },
   "devDependencies": {
-    "gh-pages": "^6.0.0"
+    "gh-pages": "^6.1.1"
   }
 }
