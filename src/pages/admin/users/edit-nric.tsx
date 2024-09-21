@@ -355,7 +355,7 @@ export default function Profile() {
                 isLoading={isLoading}
                 disabled={!allowInput}
               >
-                Bind NRIC
+                Bind NRIC/Passport Number
               </Button>
             </div>
           </form>
@@ -402,7 +402,7 @@ export default function Profile() {
                   });
               }}
             >
-              Unbind NRIC
+              Unbind NRIC/Passport Number
             </Button>
           )}
         </div>

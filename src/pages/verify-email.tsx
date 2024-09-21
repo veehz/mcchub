@@ -31,7 +31,7 @@ export default function App() {
       <div className="space-y-2">
         <div className="text-center mt-4">
           Click below to receive a verification email. Once you have verified
-          your email, you may log in.
+          your email, you may refresh the page to log in.
         </div>
         <div>{message}</div>
         <Button
