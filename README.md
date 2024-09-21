@@ -41,7 +41,7 @@ service firebase.storage {
 
 Create a web app from Firebase.
 
-Update the Firebase config in `/src/firebase.js`.
+Update the Firebase config in `/src/data/config.js`.
 
 ## Getting Started
 
