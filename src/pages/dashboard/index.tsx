@@ -17,6 +17,8 @@ import {
   getUserDetails,
 } from "@/services/storage";
 
+import config from "@/data/config";
+
 const Card = ({
   title,
   className,
@@ -227,8 +229,7 @@ export default function Home() {
           <Card title="Your Payments">
             <Card title="You need to pay..." className="">
               <span className="text-xl">
-                {studentCount *
-                  parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0")}
+                {studentCount * config.registration_fee}
               </span>
             </Card>
             <div>

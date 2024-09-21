@@ -10,6 +10,8 @@ import { auth, db } from "@/firebase";
 import Modal, { reducer } from "@/components/Modal";
 import { useRouter } from "next/router";
 
+import config from "@/data/config";
+
 interface PaymentInput {
   amount: string;
   proof: FileList | null;
@@ -38,9 +40,9 @@ function createUniqueId(): string {
 export default function App() {
   const [message, setMessage] = useState<string | string[]>([
     "Payment to bank:",
-    "My Bank",
-    "0000000",
-    "Fees: RM15/contestant",
+    config.bank_name,
+    config.bank_account,
+    `Fees: ${config.currency}${config.registration_fee}/contestant`,
   ]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -179,7 +181,7 @@ export default function App() {
               <div>
                 {TextInput({
                   inputName: "Amount",
-                  placeholder: "10",
+                  placeholder: String(config.registration_fee),
                   hook: register("amount", {
                     required: "Amount is required",
                     pattern: {

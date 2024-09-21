@@ -6,6 +6,8 @@ This is a [Next.js](https://nextjs.org/) project.
 
 Edit the `.env.local.example` file and rename it to `.env.local`.
 
+Edit `src/data/config.js`.
+
 ### Firebase
 
 #### Authentication

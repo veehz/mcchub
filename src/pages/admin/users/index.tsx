@@ -8,6 +8,8 @@ import { PaymentCard } from "../payments";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import config from "@/data/config";
+
 const sum = (a: number, b: number) => a + b;
 const reduceMethods: {
   [key: string]: (a: boolean, b: boolean) => boolean;
@@ -82,8 +84,7 @@ const UserCard = ({
       // options
       if (options["due"] == "true") {
         const needToPay =
-          Object.keys(managedStudents).length *
-          parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0");
+          Object.keys(managedStudents).length * config.registration_fee;
         const approvedPayment = Object.keys(payments)
           .filter((key) => payments[key]?.approved?.status == "approved")
           .map((key) => parseFloat(payments[key].amount))
@@ -186,8 +187,7 @@ const UserCard = ({
               </div>
               <div>
                 <span className="font-bold">Need to pay:</span>{" "}
-                {Object.keys(managedStudents).length *
-                  parseFloat(process.env.NEXT_PUBLIC_REGISTRATION_FEE || "0")}
+                {Object.keys(managedStudents).length * config.registration_fee}
               </div>
               <div>
                 <span className="font-bold">Approved Payment:</span>{" "}
@@ -389,13 +389,19 @@ export default function App() {
           >
             Advanced Search Guide
           </div>
-          <div className="mx-2 text-sm m-2 p-2 rounded-md border border-solid border-black" hidden={!showSearchGuide}>
+          <div
+            className="mx-2 text-sm m-2 p-2 rounded-md border border-solid border-black"
+            hidden={!showSearchGuide}
+          >
             <div>
-              <span className="font-mono bg-gray-200">due:true</span>{" "}
-              shows teachers whose approved payments are not enough to cover the registration fees.
+              <span className="font-mono bg-gray-200">due:true</span> shows
+              teachers whose approved payments are not enough to cover the
+              registration fees.
             </div>
             <div>
-              <span className="font-mono bg-gray-200">role:student | parent | teacher | admin</span>{" "}
+              <span className="font-mono bg-gray-200">
+                role:student | parent | teacher | admin
+              </span>{" "}
               shows users with the respective role.
             </div>
             <div>
@@ -403,12 +409,14 @@ export default function App() {
               shows users with [nric] as their managed student.
             </div>
             <div>
-              <span className="font-mono bg-gray-200">searchtype:and | or | xor</span>{" "}
+              <span className="font-mono bg-gray-200">
+                searchtype:and | or | xor
+              </span>{" "}
               determines the search type (default: and)
             </div>
             <div>
-              <span className="font-mono bg-gray-200">not:true</span>{" "}
-              inverts the search results
+              <span className="font-mono bg-gray-200">not:true</span> inverts
+              the search results
             </div>
           </div>
           <div className="flex flex-col">
