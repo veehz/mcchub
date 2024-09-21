@@ -6,6 +6,7 @@ ghpages.publish(
     branch: "gh-pages",
     repo: "git@github.com:veehz/mcchub.git",
     message: 'Auto-generated commit',
+    nojekyll: true,
     dotfiles: true
   },
   function (err) {
