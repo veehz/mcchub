@@ -78,7 +78,7 @@ export default function App() {
       dispatch({
         ...errorModal,
         children: "Please enter your passport number.",
-      })
+      });
       setIsLoading(false);
       setAllowInput(true);
       return;
@@ -196,18 +196,25 @@ export default function App() {
                   : null}
                 {isMalaysian === "false"
                   ? TextInput({
-                      hook: register("passport"),
+                      hook: register("passport", {
+                        pattern: {
+                          value: /[A-Z0-9]{1,9}/,
+                          message:
+                            "Invalid Passport format. Passports should only contain uppercase letters and numbers. If this is not the case for your passport number, please contact us.",
+                        },
+                      }),
                       id: "nric",
                       inputName: "Passport Number",
-                      placeholder: "Passport Number",
+                      placeholder: "Passport Number (e.g. A1234567)",
                       disabled: !allowInput,
+                      errorMsg: errors?.passport?.message,
                     })
                   : null}
               </div>
             </InputList>
 
             <Button
-            full={true}
+              full={true}
               props={{ type: "submit" }}
               isLoading={isLoading}
               disabled={!allowInput}

@@ -97,7 +97,10 @@ const rules = {
                 `data.parent().child('nationality').val() == 'Malaysian'`,
                 `data.val().matches(/[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/)`
               ),
-              `data.parent().child('nationality').val() != 'Malaysian'`
+              and(
+                `data.parent().child('nationality').val() != 'Malaysian'`,
+                `data.val().matches(/[A-Z0-9]{1,9}/)`
+              )
             )
           )
         ),
@@ -225,7 +228,7 @@ const rules = {
 
     information: {
       ".validate": "newData.isString()",
-    }
+    },
   },
 
   $other: { ".validate": "false" },

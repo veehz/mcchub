@@ -161,8 +161,9 @@ export default function Profile() {
             return;
           }
         }
-      }, {
-        onlyOnce: true
+      },
+      {
+        onlyOnce: true,
       }
     );
   };
@@ -298,12 +299,12 @@ export default function Profile() {
                     id="nationality"
                     defaultValue={"select-one"}
                     {...register("nationality", {
-                        validate: {
-                          notEmpty: (value) =>
-                            value != "select-one" ||
-                            "Please select user nationality",
-                        },
-                      })}
+                      validate: {
+                        notEmpty: (value) =>
+                          value != "select-one" ||
+                          "Please select user nationality",
+                      },
+                    })}
                   >
                     <option value="select-one" disabled>
                       Select user nationality
@@ -312,10 +313,7 @@ export default function Profile() {
                       .filter((nat) => nat != "Malaysian")
                       .map((nat, index) => {
                         return (
-                          <option
-                            key={index}
-                            value={nat}
-                          >
+                          <option key={index} value={nat}>
                             {nat}
                           </option>
                         );
@@ -341,11 +339,18 @@ export default function Profile() {
                 : null}
               {isMalaysian === "false"
                 ? TextInput({
-                    hook: register("passport"),
+                    hook: register("passport", {
+                      pattern: {
+                        value: /[A-Z0-9]{1,9}/,
+                        message:
+                          "Invalid Passport format. Passports should only contain uppercase letters and numbers. If this is not the case for your passport number, please contact us.",
+                      },
+                    }),
                     id: "nric",
                     inputName: "Passport Number",
-                    placeholder: "Passport Number",
+                    placeholder: "Passport Number (e.g. A1234567)",
                     disabled: !allowInput,
+                    errorMsg: errors?.passport?.message,
                   })
                 : null}
 
