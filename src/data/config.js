@@ -1,8 +1,7 @@
 module.exports = {
   currency: "RM",
   registration_fee: 20,
-  bank_name: "Bank",
-  bank_account: "1234567890",
+  bank_details: ["Bank","Account Name","Number:1010101010"],
   firebaseConfig: {
     apiKey: "AIzaSyC02WuJ5btg2A6iTeGwYi0IDzGKziODv2k",
     authDomain: "mcc-registration-test.firebaseapp.com",

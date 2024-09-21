@@ -40,9 +40,8 @@ function createUniqueId(): string {
 export default function App() {
   const [message, setMessage] = useState<string | string[]>([
     "Payment to bank:",
-    config.bank_name,
-    config.bank_account,
-    `Fees: ${config.currency}${config.registration_fee}/contestant`,
+    ...config.bank_details,
+    `Fees: ${config.currency}${config.registration_fee} per contestant`,
   ]);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
