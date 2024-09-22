@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 import config from "@/data/config";
+import { downloadCsv, jsonToCsv } from "@/helpers/json";
 
 const sum = (a: number, b: number) => a + b;
 const reduceMethods: {
@@ -25,6 +26,18 @@ const reduceMethodsDefaultValues: {
   or: false,
   xor: false,
 };
+
+function getBillingAddress(addrObject: { [key: string]: string }): string {
+  let address = "";
+  if (addrObject.line1) address += addrObject.line1 + "\n";
+  if (addrObject.line2) address += addrObject.line2 + "\n";
+  if (addrObject.city) address += addrObject.city + "\n";
+  if (addrObject.postalCode) address += addrObject.postalCode + "\n";
+  if (addrObject.state) address += addrObject.state + "\n";
+  if (addrObject.country) address += addrObject.country + "\n";
+  return address;
+}
+
 const UserCard = ({
   userId,
   users,
@@ -131,17 +144,6 @@ const UserCard = ({
     return words.join(" ");
   }
 
-  function getBillingAddress(addrObject: { [key: string]: string }): string {
-    let address = "";
-    if (addrObject.line1) address += addrObject.line1 + "\n";
-    if (addrObject.line2) address += addrObject.line2 + "\n";
-    if (addrObject.city) address += addrObject.city + "\n";
-    if (addrObject.postalCode) address += addrObject.postalCode + "\n";
-    if (addrObject.state) address += addrObject.state + "\n";
-    if (addrObject.country) address += addrObject.country + "\n";
-    return address;
-  }
-
   return (
     <div
       className={
@@ -175,7 +177,7 @@ const UserCard = ({
           {/* Billing Address */}
           {Object.keys(users[userId]?.billingAddress || {}).length ? (
             <div className="display-linebreak">
-              <span className="font-bold">Billing Address</span>:<br/>
+              <span className="font-bold">Billing Address</span>:<br />
               {getBillingAddress(users[userId].billingAddress)}
             </div>
           ) : null}
@@ -378,6 +380,45 @@ export default function App() {
     }
   });
 
+  function exportUsers() {
+    const fields = [
+      'User ID',
+      'Name',
+      'Email',
+      'Role',
+      'Form',
+      'Gender',
+      'Date of Birth',
+      'State',
+      'Country',
+      'School',
+      'Nationality',
+      'Identification Number',
+      'Billing Address',
+      'Managed Students',
+      'Payments',
+    ];
+
+    const data = Object.keys(users).map((userId) => ({
+      'User ID': userId,
+      'Name': users[userId]?.name,
+      'Email': users[userId]?.email,
+      'Role': roles[userId],
+      'Form': users[userId]?.form,
+      'Gender': users[userId]?.gender,
+      'Date of Birth': users[userId]?.dob,
+      'State': users[userId]?.state,
+      'Country': users[userId]?.country,
+      'School': users[userId]?.school,
+      'Identification Number': users[userId]?.nric,
+      'Billing Address': getBillingAddress(users[userId]?.billingAddress || {}),
+      'Managed Students': Object.keys(managedStudents[userId] || {}).join(', '),
+      'Payments': Object.keys(payments[userId] || {}).join(', '),
+    }));
+
+    downloadCsv(jsonToCsv(data, fields), 'users.csv');
+  }
+
   return (
     <Dashboard title="Users">
       <div className="place-content-center w-full">
@@ -394,6 +435,9 @@ export default function App() {
               Loading NRIC Data
             </div>
           </div>
+          <Button className={"ml-auto"} onClick={exportUsers}>
+            Export Users
+          </Button>
           <TextInput
             placeholder="Search"
             inputName={null}
