@@ -1,7 +1,14 @@
 module.exports = {
+  gh_pages_config: {
+    branch: "gh-pages",
+    repo: "git@github.com:veehz/mcchub.git",
+    message: "Auto-generated commit",
+    nojekyll: true,
+    dotfiles: true,
+  },
   currency: "RM",
   registration_fee: 20,
-  bank_details: ["Bank","Account Name","Number:1010101010"],
+  bank_details: ["Bank", "Account Name", "Number:1010101010"],
   firebaseConfig: {
     apiKey: "AIzaSyC02WuJ5btg2A6iTeGwYi0IDzGKziODv2k",
     authDomain: "mcc-registration-test.firebaseapp.com",
