@@ -18,7 +18,7 @@ Enable Authentication and set up email and password login.
 
 Enable Realtime Database.
 
-Rules: run `helpers/firebaseRuleMaker.js` and copy the output into the rules.
+Rules: run `node src/helpers/firebaseRuleMaker.js` and copy the output into the rules.
 
 #### Storage
 

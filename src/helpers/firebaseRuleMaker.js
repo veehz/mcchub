@@ -236,3 +236,4 @@ const rules = {
 };
 
 console.log(JSON.stringify({ rules }, null, 2));
+module.exports = rules;
