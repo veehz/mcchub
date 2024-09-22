@@ -47,7 +47,7 @@ export async function getRole(callback: (role: string) => void) {
   }
 
   onValue(
-    ref(db, "users/" + auth.currentUser!.uid + "/role"),
+    ref(db, "role/" + auth.currentUser!.uid),
     (snapshot) => {
       callback(snapshot.val());
     },
