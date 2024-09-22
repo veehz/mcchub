@@ -27,15 +27,17 @@ export async function getUserDetails(callback: (userDetails: any) => void) {
     return null;
   }
 
-  try {
-    console.log("fetching user details");
-    onValue(ref(db, "users/" + auth.currentUser!.uid), (snapshot) => {
+  console.log("fetching user details");
+  onValue(
+    ref(db, "users/" + auth.currentUser!.uid),
+    (snapshot) => {
       callback(snapshot.val());
-    });
-  } catch (error) {
-    console.error("Error fetching user details from Firebase:", error);
-    throw error;
-  }
+    },
+    (error) => {
+      console.error("Error fetching user details from Firebase:", error);
+      throw error;
+    }
+  );
 }
 
 export async function getRole(callback: (role: string) => void) {
@@ -44,14 +46,16 @@ export async function getRole(callback: (role: string) => void) {
     return null;
   }
 
-  try {
-    onValue(ref(db, "users/" + auth.currentUser!.uid + "/role"), (snapshot) => {
+  onValue(
+    ref(db, "users/" + auth.currentUser!.uid + "/role"),
+    (snapshot) => {
       callback(snapshot.val());
-    });
-  } catch (error) {
-    console.error("Error fetching user role from Firebase:", error);
-    throw error;
-  }
+    },
+    (error) => {
+      console.error("Error fetching user role from Firebase:", error);
+      throw error;
+    }
+  );
 }
 
 export async function getManagedStudents(
@@ -61,17 +65,16 @@ export async function getManagedStudents(
     return null;
   }
 
-  try {
-    onValue(
-      ref(db, "managedStudents/" + auth.currentUser!.uid + "/"),
-      (snapshot) => {
-        callback(snapshot.val());
-      }
-    );
-  } catch (error) {
-    console.error("Error fetching managed students from Firebase:", error);
-    throw error;
-  }
+  onValue(
+    ref(db, "managedStudents/" + auth.currentUser!.uid + "/"),
+    (snapshot) => {
+      callback(snapshot.val());
+    },
+    (error) => {
+      console.error("Error fetching managed students from Firebase:", error);
+      throw error;
+    }
+  );
 }
 
 export async function getManagedStudentsCount(
@@ -89,14 +92,16 @@ export async function getPayments(callback: (payments: any) => void) {
     return null;
   }
 
-  try {
-    onValue(ref(db, "payments/" + auth.currentUser!.uid + "/"), (snapshot) => {
+  onValue(
+    ref(db, "payments/" + auth.currentUser!.uid + "/"),
+    (snapshot) => {
       callback(snapshot.val());
-    });
-  } catch (error) {
-    console.error("Error fetching payments from Firebase:", error);
-    throw error;
-  }
+    },
+    (error) => {
+      console.error("Error fetching payments from Firebase:", error);
+      throw error;
+    }
+  );
 }
 
 export async function getContestInfo(callback: (contestInfo: any) => void) {
@@ -104,12 +109,14 @@ export async function getContestInfo(callback: (contestInfo: any) => void) {
     return null;
   }
 
-  try {
-    onValue(ref(db, "contestInfo"), (snapshot) => {
+  onValue(
+    ref(db, "contestInfo"),
+    (snapshot) => {
       callback(snapshot.val());
-    });
-  } catch (error) {
-    console.error("Error fetching contest info from Firebase:", error);
-    throw error;
-  }
+    },
+    (error) => {
+      console.error("Error fetching contest info from Firebase:", error);
+      throw error;
+    }
+  );
 }
