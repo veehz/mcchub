@@ -69,7 +69,17 @@ export default function Profile() {
         let value = data[x];
         updates[key as string] = value ? value : "";
       }
+
+      // Convert billingAddress to nested object
+      if(x.startsWith("billingAddress") && updates[x]) {
+        let val = updates[x] as string;
+        delete updates[x];
+        let newKey = x.slice("billingAddress".length);
+        newKey = newKey.charAt(0).toLowerCase() + newKey.slice(1);
+        updates["billingAddress/" + newKey] = val;
+      }
     }
+    console.log("updates", updates);
     update(child(ref(db), "users/" + auth.currentUser?.uid), updates)
       .then(() => {
         setIsLoading(false);

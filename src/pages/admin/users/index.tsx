@@ -131,6 +131,17 @@ const UserCard = ({
     return words.join(" ");
   }
 
+  function getBillingAddress(addrObject: { [key: string]: string }): string {
+    let address = "";
+    if (addrObject.line1) address += addrObject.line1 + "\n";
+    if (addrObject.line2) address += addrObject.line2 + "\n";
+    if (addrObject.city) address += addrObject.city + "\n";
+    if (addrObject.postalCode) address += addrObject.postalCode + "\n";
+    if (addrObject.state) address += addrObject.state + "\n";
+    if (addrObject.country) address += addrObject.country + "\n";
+    return address;
+  }
+
   return (
     <div
       className={
@@ -150,13 +161,24 @@ const UserCard = ({
             <span className="font-bold">Role</span>: {role}
           </div>
           {Object.keys(users[userId])
-            .filter((key) => !["email", "name", "nric"].includes(key))
+            .filter(
+              (key) =>
+                !["email", "name", "nric", "billingAddress"].includes(key)
+            )
             .map((key) => (
               <div key={key}>
                 <span className="font-bold">{capitalize(key)}</span>:{" "}
                 {users[userId][key]}
               </div>
             ))}
+
+          {/* Billing Address */}
+          {Object.keys(users[userId]?.billingAddress || {}).length ? (
+            <div className="display-linebreak">
+              <span className="font-bold">Billing Address</span>:<br/>
+              {getBillingAddress(users[userId].billingAddress)}
+            </div>
+          ) : null}
 
           {/* payments */}
           {role == "teacher" || role == "parent" ? (
