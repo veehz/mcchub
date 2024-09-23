@@ -14,6 +14,12 @@ module.exports = {
   currency: "RM",
   registration_fee: 20,
   bank_details: ["Bank", "Account Name", "Number:1010101010"],
+  links: [
+    {
+      href: "https://ioimalaysia.org/",
+      name: "Malaysian Informatics and Programming Society (MIPS) Website",
+    }
+  ],
   firebaseConfig: {
     apiKey: "AIzaSyC02WuJ5btg2A6iTeGwYi0IDzGKziODv2k",
     authDomain: "mcc-registration-test.firebaseapp.com",

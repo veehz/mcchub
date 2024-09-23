@@ -229,7 +229,8 @@ export default function Home() {
           <Card title="Your Payments">
             <Card title="You need to pay..." className="">
               <span className="text-xl">
-                {config.currency}{studentCount * config.registration_fee}
+                {config.currency}
+                {studentCount * config.registration_fee}
               </span>
             </Card>
             <div>
@@ -251,7 +252,8 @@ export default function Home() {
                               {payment.paymentId}
                             </td>
                             <td className="border px-4 py-2">
-                              {config.currency}{payment.amount}
+                              {config.currency}
+                              {payment.amount}
                             </td>
                             <td className="border px-4 py-2">
                               {payment.approved
@@ -270,15 +272,11 @@ export default function Home() {
         <div className="w-full md:w-1/3 px-2">
           {/* content for third column */}
           <Card title="Important Links">
-            {/* button link to https://ioimalaysia.org/ */}
-            <Button
-              full={true}
-              onClick={() => {
-                window.open("https://ioimalaysia.org/", "_blank");
-              }}
-            >
-              Malaysia Informatics and Programming Society (MIPS) Website
-            </Button>
+            {config.links.map((link) => (
+              <a href={link.href} target="_blank" key={link.href}>
+                <Button full={true}>{link.name}</Button>
+              </a>
+            ))}
           </Card>
           {contestInfo?.informationTitle ? (
             <Card title={contestInfo.informationTitle}>
