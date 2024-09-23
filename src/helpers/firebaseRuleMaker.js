@@ -61,7 +61,7 @@ const rules = {
       },
 
       // receipt generation
-      billingMobileNumber: { ".validate": "true" },
+      billingMobileNumber: { ".validate": "newData.val().matches(/\\+?[\\d ]{1,6}[- ]?[\\d ]{1,15}/)" },
       billingAddress: {
         line1: { ".validate": "true" },
         line2: { ".validate": "true" },

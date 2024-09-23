@@ -307,7 +307,12 @@ export default function Profile() {
                   This will be written on your receipt.
                 </div>
                 {Input({
-                  hook: register("billingMobileNumber"),
+                  hook: register("billingMobileNumber", {
+                    pattern: {
+                      value: /\+?[\d ]{1,6}[- ]?[\d ]{1,15}/,
+                      message: "Please enter a valid mobile number.",
+                    },
+                  }),
                   id: "billingMobileNumber",
                   placeholder: "Mobile Number",
                 })}
