@@ -211,10 +211,12 @@ const UserCard = ({
               </div>
               <div>
                 <span className="font-bold">Need to pay:</span>{" "}
+                {config.currency}
                 {Object.keys(managedStudents).length * config.registration_fee}
               </div>
               <div>
                 <span className="font-bold">Approved Payment:</span>{" "}
+                {config.currency}
                 {Object.keys(payments)
                   .filter(
                     (key) => payments[key]?.approved?.status == "approved"
@@ -382,41 +384,41 @@ export default function App() {
 
   function exportUsers() {
     const fields = [
-      'User ID',
-      'Name',
-      'Email',
-      'Role',
-      'Form',
-      'Gender',
-      'Date of Birth',
-      'State',
-      'Country',
-      'School',
-      'Nationality',
-      'Identification Number',
-      'Billing Address',
-      'Managed Students',
-      'Payments',
+      "User ID",
+      "Name",
+      "Email",
+      "Role",
+      "Form",
+      "Gender",
+      "Date of Birth",
+      "State",
+      "Country",
+      "School",
+      "Nationality",
+      "Identification Number",
+      "Billing Address",
+      "Managed Students",
+      "Payments",
     ];
 
     const data = Object.keys(users).map((userId) => ({
-      'User ID': userId,
-      'Name': users[userId]?.name,
-      'Email': users[userId]?.email,
-      'Role': roles[userId],
-      'Form': users[userId]?.form,
-      'Gender': users[userId]?.gender,
-      'Date of Birth': users[userId]?.dob,
-      'State': users[userId]?.state,
-      'Country': users[userId]?.country,
-      'School': users[userId]?.school,
-      'Identification Number': users[userId]?.nric,
-      'Billing Address': getBillingAddress(users[userId]?.billingAddress || {}),
-      'Managed Students': Object.keys(managedStudents[userId] || {}).join(', '),
-      'Payments': Object.keys(payments[userId] || {}).join(', '),
+      "User ID": userId,
+      Name: users[userId]?.name,
+      Email: users[userId]?.email,
+      Role: roles[userId],
+      Form: users[userId]?.form,
+      Gender: users[userId]?.gender,
+      "Date of Birth": users[userId]?.dob,
+      State: users[userId]?.state,
+      Country: users[userId]?.country,
+      School: users[userId]?.school,
+      "Identification Number": users[userId]?.nric,
+      "Billing Address": getBillingAddress(users[userId]?.billingAddress || {}),
+      "Managed Students": Object.keys(managedStudents[userId] || {}).join(", "),
+      Payments: Object.keys(payments[userId] || {}).join(", "),
     }));
 
-    downloadCsv(jsonToCsv(data, fields), 'users.csv');
+    downloadCsv(jsonToCsv(data, fields), "users.csv");
   }
 
   return (

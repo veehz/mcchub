@@ -1,5 +1,6 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
+import config from "@/data/config";
 import { auth, db } from "@/firebase";
 import { onValue, ref, set } from "firebase/database";
 import {
@@ -44,7 +45,7 @@ export const PaymentCard = ({
         {showUid ? `${uid}: ` : null} #{paymentId}
       </div>
       <div className="text-gray-700 text-base mb-2">
-        Payment of: {payment?.amount}{" "}
+        Payment of: {config.currency}{payment?.amount}{" "}
       </div>
       {/* <div className="text-gray-700 text-base mb-2">{msg}</div> */}
       <div className="flex">

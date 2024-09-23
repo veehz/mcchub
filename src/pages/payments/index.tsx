@@ -1,5 +1,6 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
+import config from "@/data/config";
 import { auth, db } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { onValue, ref } from "firebase/database";
@@ -43,7 +44,7 @@ const PaymentCard = ({
         "rounded-lg overflow-hidden shadow-lg p-4 mb-4 " + color.current
       }
     >
-      <div className="font-bold text-xl mb-2">#{paymentId}</div>
+      <div className="font-bold text-xl mb-2">#{paymentId} ({config.currency}{payment.amount})</div>
       <div className="text-gray-700 text-base mb-2">{msg.current}</div>
       <Button
         onClick={() => {

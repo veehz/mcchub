@@ -229,7 +229,7 @@ export default function Home() {
           <Card title="Your Payments">
             <Card title="You need to pay..." className="">
               <span className="text-xl">
-                {studentCount * config.registration_fee}
+                {config.currency}{studentCount * config.registration_fee}
               </span>
             </Card>
             <div>
@@ -251,7 +251,7 @@ export default function Home() {
                               {payment.paymentId}
                             </td>
                             <td className="border px-4 py-2">
-                              {payment.amount}
+                              {config.currency}{payment.amount}
                             </td>
                             <td className="border px-4 py-2">
                               {payment.approved
