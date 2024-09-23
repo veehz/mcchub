@@ -273,7 +273,7 @@ export default function Home() {
           {/* content for third column */}
           <Card title="Important Links">
             {config.links.map((link) => (
-              <a href={link.href} target="_blank" key={link.href}>
+              <a href={link.href} target="_blank" rel="noopener" key={link.href}>
                 <Button full={true}>{link.name}</Button>
               </a>
             ))}

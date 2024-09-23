@@ -40,6 +40,7 @@ export default function LoginLanding() {
         <Link
           href="https://ioimalaysia.org/competition/mcc/"
           target="_blank"
+          rel="noopener"
           className="flex justify-center p-2 items-center bg-blue-100 hover:bg-blue-200 rounded-lg drop-shadow-md m-2 md:py-16 mx-4"
         >
           Learn about MCC
