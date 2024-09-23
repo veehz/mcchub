@@ -179,7 +179,7 @@ export default function App() {
             <div className="space-y-6">
               <div>
                 {TextInput({
-                  inputName: "Amount",
+                  inputName: `Amount (${config.currency})`,
                   placeholder: String(config.registration_fee),
                   hook: register("amount", {
                     required: "Amount is required",
