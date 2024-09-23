@@ -14,6 +14,7 @@ import RadioInputList from "@/components/FormComponents/RadioInputList";
 import Link from "next/link";
 import Modal, { reducer, ModalInfo } from "@/components/Modal";
 import { useRouter } from "next/router";
+import config from "@/data/config";
 
 interface Profile {
   name?: string;
@@ -184,6 +185,9 @@ export default function App() {
     );
   };
 
+  const genders = config.genders as {
+    [key: string]: string;
+  };
   return (
     <Dashboard title="Edit Profile">
       <div className="flex min-h-full items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -223,27 +227,18 @@ export default function App() {
                   title="Gender"
                   errorMsg={errors?.gender?.message}
                 >
-                  <RadioInput
-                    id="male"
-                    hook={register("gender")}
-                    disabled={!allowInput}
-                  >
-                    I am a Male
-                  </RadioInput>
-                  <RadioInput
-                    id="female"
-                    hook={register("gender")}
-                    disabled={!allowInput}
-                  >
-                    I am a Female
-                  </RadioInput>
-                  <RadioInput
-                    id="undisclosed"
-                    hook={register("gender")}
-                    disabled={!allowInput}
-                  >
-                    I am non-binary/I do not wish to disclose my gender
-                  </RadioInput>
+                  {Object.keys(genders).map((gender) => {
+                    return (
+                      <RadioInput
+                        key={gender}
+                        id={gender}
+                        hook={register("gender")}
+                        disabled={!allowInput}
+                      >
+                        {genders[gender]}
+                      </RadioInput>
+                    );
+                  })}
                 </RadioInputList>
               </InputList>
 

@@ -1,5 +1,7 @@
 "use strict";
 
+const config = require("../data/config");
+
 function authUid() {
   return `auth.uid`;
 }
@@ -73,7 +75,9 @@ const rules = {
       // student details
       form: { ".validate": "true" },
       gender: {
-        ".validate": newDataIs(["'male'", "'female'", "'undisclosed'"]),
+        ".validate": newDataIs(
+          Object.keys(config.genders).map((key) => `'${key}'`)
+        ),
       },
       dob: { ".validate": "newData.val().matches(/\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/)" },
 

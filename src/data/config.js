@@ -6,6 +6,11 @@ module.exports = {
     nojekyll: true,
     dotfiles: true,
   },
+  genders: {
+    "male": "I am a Male",
+    "female": "I am a Female",
+    "undisclosed": "Other/I prefer not to disclose",
+  },
   currency: "RM",
   registration_fee: 20,
   bank_details: ["Bank", "Account Name", "Number:1010101010"],
