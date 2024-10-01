@@ -115,6 +115,7 @@ export default function Profile() {
               "NRIC/Passport Number is already taken. Please contact us if this is a mistake.",
           });
           setIsLoading(false);
+          setAllowInput(true);
           return;
         } else {
           setSubmitted(true);
