@@ -33,15 +33,15 @@ const StudentCard = ({
           return;
         }
         onValue(
-          ref(db, "users/" + snapshot.val() + "/dob"),
+          ref(db, "users/" + snapshot.val()),
           (snapshot) => {
             setShowButton(true);
-            if (!snapshot.exists()) {
-              setMsg("Profile bound, Profile isn't complete");
+            if (!snapshot.exists() || !snapshot.val().dob || !snapshot.val().name) {
+              setMsg(`Profile bound${snapshot.val().name ? ` to ${snapshot.val().name}` : ""}, Profile isn't complete`);
               return;
             }
             setMsg(
-              "Profile complete."
+              `Profile complete, bound to ${snapshot.val().name}`
             );
           }, (error) => {
             console.error(error);
