@@ -1,17 +1,21 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { auth } from "../firebase.js";
+import { auth, db } from "../firebase.js";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 
 import AuthLayout from "@/components/AuthLayout";
+import { goOffline } from "firebase/database";
+// import config from "@/data/config.js";
+
 
 export default function LoginLanding() {
   const router = useRouter();
   useEffect(() => {
     if (router?.query?.signout === "true") {
+      goOffline(db);
       auth.signOut();
-      router.push("/");
+      window.location.href = router.basePath;
     } else {
       onAuthStateChanged(auth, (user) => {
         if (user) router.push("/dashboard");
