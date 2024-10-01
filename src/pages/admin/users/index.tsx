@@ -86,7 +86,11 @@ const UserCard = ({
       for (const k of rawSearchKeys) {
         let found = false;
         for (const key of Object.keys(users[userId])) {
-          if (users[userId][key].toLowerCase().includes(k)) {
+          if (
+            (typeof users[userId][key] == "number" ||
+              typeof users[userId][key] == "string") &&
+            (users[userId][key] as string).toLowerCase().includes(k)
+          ) {
             found = true;
             break;
           }
