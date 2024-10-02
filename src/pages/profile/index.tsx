@@ -16,6 +16,7 @@ import Link from "next/link";
 import Modal, { reducer, ModalInfo } from "@/components/Modal";
 import { useRouter } from "next/router";
 import config from "@/data/config";
+import regex from "@/helpers/regex";
 
 interface Profile {
   name?: string;
@@ -309,7 +310,7 @@ export default function Profile() {
                 {Input({
                   hook: register("billingMobileNumber", {
                     pattern: {
-                      value: /\+?[\d ]{1,6}[- ]?[\d ]{1,15}/,
+                      value: regex.phone,
                       message: "Please enter a valid mobile number.",
                     },
                   }),
