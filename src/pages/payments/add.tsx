@@ -11,6 +11,7 @@ import Modal, { reducer } from "@/components/Modal";
 import { useRouter } from "next/router";
 
 import config from "@/data/config";
+import regex from "@/helpers/regex";
 
 interface PaymentInput {
   amount: string;
@@ -184,7 +185,7 @@ export default function App() {
                   hook: register("amount", {
                     required: "Amount is required",
                     pattern: {
-                      value: /^[0-9]+.?[0-9]{0,2}$/,
+                      value: regex.amount,
                       message: "Amount must be a number",
                     },
                     min: {

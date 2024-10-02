@@ -15,6 +15,7 @@ import InputList from "@/components/FormComponents/InputList";
 
 import nationalities from "@/data/nationalities";
 import Modal, { ModalInfo, reducer } from "@/components/Modal";
+import regex from "@/helpers/regex";
 
 interface NRICInput {
   isMalaysian: "true" | "false";
@@ -182,8 +183,7 @@ export default function App() {
                   ? TextInput({
                       hook: register("nric", {
                         pattern: {
-                          value:
-                            /[0-9]{2}[0-1][0-9][0-3][0-9]-[0-9]{2}-[0-9]{4}/,
+                          value: regex.nric,
                           message: "Invalid NRIC format.",
                         },
                       }),
@@ -198,7 +198,7 @@ export default function App() {
                   ? TextInput({
                       hook: register("passport", {
                         pattern: {
-                          value: /[A-Z0-9]{1,9}/,
+                          value: regex.passport,
                           message:
                             "Invalid Passport format. Passports should only contain uppercase letters and numbers. If this is not the case for your passport number, please contact us.",
                         },

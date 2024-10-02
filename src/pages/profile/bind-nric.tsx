@@ -14,6 +14,7 @@ import RadioInput from "@/components/FormComponents/RadioInput";
 import nationalities from "@/data/nationalities";
 import Modal, { ModalInfo, reducer } from "@/components/Modal";
 import { useRouter } from "next/router";
+import regex from "@/helpers/regex";
 
 interface NRICInput {
   isMalaysian: "null" | "true" | "false";
@@ -296,8 +297,7 @@ export default function Profile() {
                 ? TextInput({
                     hook: register("nric", {
                       pattern: {
-                        value:
-                          /[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/,
+                        value: regex.nric,
                         message: "Invalid NRIC format.",
                       },
                     }),

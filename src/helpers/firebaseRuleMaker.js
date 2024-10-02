@@ -1,6 +1,7 @@
 "use strict";
 
 const config = require("../data/config");
+const regex = require("./regex");
 
 function authUid() {
   return `auth.uid`;
@@ -61,7 +62,7 @@ const rules = {
       },
 
       // receipt generation
-      billingMobileNumber: { ".validate": "newData.val().matches(/\\+?[\\d ]{1,6}[- ]?[\\d ]{1,15}/)" },
+      billingMobileNumber: { ".validate": `newData.val().matches(${regex.phone.toString()})` },
       billingAddress: {
         line1: { ".validate": "true" },
         line2: { ".validate": "true" },
@@ -79,7 +80,7 @@ const rules = {
           Object.keys(config.genders).map((key) => `'${key}'`)
         ),
       },
-      dob: { ".validate": "newData.val().matches(/\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/)" },
+      dob: { ".validate": `newData.val().matches(${regex.dob.toString()})` },
 
       state: { ".validate": "true" },
       country: { ".validate": "true" },
@@ -100,11 +101,11 @@ const rules = {
             or(
               and(
                 `data.parent().child('nationality').val() == 'Malaysian'`,
-                `newData.val().matches(/[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/)`
+                `newData.val().matches(${regex.nric.toString()})`
               ),
               and(
                 `data.parent().child('nationality').val() != 'Malaysian'`,
-                `newData.val().matches(/[A-Z0-9]{1,9}/)`
+                `newData.val().matches(${regex.passport.toString()})`
               )
             )
           )
@@ -182,7 +183,7 @@ const rules = {
         ".write": or(self(), isRole("admin")),
         amount: {
           ".write": or(once(), isRole("admin")),
-          ".validate": "newData.isString()",
+          ".validate": `newData.val().matches(${regex.amount.toString()})`,
         },
         fileExtension: {
           ".write": or(once(), isRole("admin")),

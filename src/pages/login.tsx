@@ -10,6 +10,7 @@ import {
 import Button from "@/components/Button";
 import FormLayout from "@/components/FormLayout";
 import { useEffect, useState } from "react";
+import regex from "@/helpers/regex.js";
 
 interface LoginInput {
   email: string;
@@ -75,7 +76,7 @@ export default function LoginPage() {
               {...register("email", {
                 required: "Email address is required.",
                 pattern: {
-                  value: /\S+@\S+\.\S+/,
+                  value: regex.email,
                   message: "Entered value does not match email format.",
                 },
               })}
