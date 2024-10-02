@@ -183,7 +183,7 @@ export default function App() {
                       hook: register("nric", {
                         pattern: {
                           value:
-                            /[0-9]{2}[0-1][0-9][0-3][0-9]-[0-1][0-9]-[0-9]{4}/,
+                            /[0-9]{2}[0-1][0-9][0-3][0-9]-[0-9]{2}-[0-9]{4}/,
                           message: "Invalid NRIC format.",
                         },
                       }),
