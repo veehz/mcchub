@@ -15,7 +15,9 @@ export default function LoginLanding() {
     if (router?.query?.signout === "true") {
       goOffline(db);
       auth.signOut();
-      window.location.href = router.basePath;
+      router.replace("/").then(() => {
+        router.reload();
+      });
     } else {
       onAuthStateChanged(auth, (user) => {
         if (user) router.push("/dashboard");
