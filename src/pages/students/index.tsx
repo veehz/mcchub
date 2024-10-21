@@ -1,8 +1,9 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
 import { auth, db } from "@/firebase";
+import { getManagedStudents } from "@/services/storage";
 import { onAuthStateChanged } from "firebase/auth";
-import { onValue, ref } from "firebase/database";
+import { child, onValue, ref, set, update } from "firebase/database";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
@@ -26,14 +27,36 @@ const StudentCard = ({
   const [msg, setMsg] = useState<any>("");
   const [showButton, setShowButton] = useState<boolean>(false);
 
+  const [studentExists, setStudentExists] = useState<boolean>(true);
+
+  function deleteStudent() {
+    if (!auth.currentUser) return; // should not happen
+    if (studentExists === false) return;
+    setStudentExists(false);
+
+    set(ref(db, `nric/${nric}/manager`), null);
+    set(ref(db, `managedStudents/${auth.currentUser.uid}/${nric}`), null);
+  }
+
   useEffect(() => {
+    if (studentExists === false) return;
     if (fetched.current) return;
     if (!fetchStatus && !forceFetchStatus) return;
     fetched.current = true;
     onValue(
-      ref(db, "nric/" + nric + "/student"),
+      ref(db, "nric/" + nric),
       (snapshot) => {
         if (!snapshot.exists()) {
+          deleteStudent();
+          return;
+        }
+
+        if (snapshot.val().manager !== auth.currentUser?.uid) {
+          deleteStudent();
+          return;
+        }
+
+        if (snapshot.val().student === undefined) {
           setMsg(
             "Profile isn't bound. " +
               "Please ask your student/child to create a student account and " +
@@ -41,8 +64,9 @@ const StudentCard = ({
           );
           return;
         }
+
         onValue(
-          ref(db, "users/" + snapshot.val()),
+          ref(db, "users/" + snapshot.val().student),
           (snapshot) => {
             setShowButton(true);
             if (
@@ -72,7 +96,10 @@ const StudentCard = ({
 
   return (
     <div
-      className={"rounded-lg overflow-hidden shadow-lg p-4 mb-4"}
+      className={
+        "rounded-lg overflow-hidden shadow-lg p-4 mb-4" +
+        (studentExists ? "" : " hidden")
+      }
       onClick={() => {
         setForceFetchStatus(true);
       }}
@@ -86,6 +113,9 @@ const StudentCard = ({
           Edit Profile
         </Button>
       </Link>
+      <Button full={true} onClick={deleteStudent}>
+        Delete Student
+      </Button>
     </div>
   );
 };
@@ -102,17 +132,11 @@ export default function App() {
         return;
       }
 
-      onValue(
-        ref(db, "managedStudents/" + user.uid),
-        (snapshot) => {
-          if (snapshot.val()) {
-            setStudents(Object.keys(snapshot.val()));
-          }
-        },
-        {
-          onlyOnce: true,
+      getManagedStudents(user.uid).then((students) => {
+        if (students) {
+          setStudents(Object.keys(students));
         }
-      );
+      });
     });
   }, []);
 

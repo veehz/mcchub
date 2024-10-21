@@ -1,5 +1,6 @@
 "use strict";
 
+const { data } = require("autoprefixer");
 const config = require("../data/config");
 const regex = require("./regex");
 
@@ -16,9 +17,6 @@ function and(...args) {
   return args.map((arg) => `(${arg})`).join(" && ");
 }
 
-function once() {
-  return `!data.exists()`;
-}
 function self() {
   return `${authUid()} == $userId`;
 }
@@ -43,8 +41,16 @@ function newDataIs(value, data = "newData.val()") {
   return or(...value.map((v) => `${data} == ${v}`));
 }
 
-function curDataIs(value, data = "data.val()") {
+function newDataIsEmpty() {
+  return `!newData.exists()`;
+}
+
+function dataIs(value, data = "data.val()") {
   return or(...value.map((v) => `${data} == ${v}`));
+}
+
+function dataIsEmpty() {
+  return `!data.exists()`;
 }
 
 const rules = {
@@ -57,12 +63,14 @@ const rules = {
 
       name: { ".validate": "newData.isString() && newData.val().length > 0" },
       email: {
-        ".write": and(self(), once(), newDataIs(["auth.token.email"])),
+        ".write": and(self(), dataIsEmpty(), newDataIs(["auth.token.email"])),
         ".validate": "newData.isString() && newData.val().length > 0",
       },
 
       // receipt generation
-      billingMobileNumber: { ".validate": `newData.val().matches(${regex.phone.toString()})` },
+      billingMobileNumber: {
+        ".validate": `newData.val().matches(${regex.phone.toString()})`,
+      },
       billingAddress: {
         line1: { ".validate": "true" },
         line2: { ".validate": "true" },
@@ -91,12 +99,12 @@ const rules = {
 
       school: { ".validate": "true" },
 
-      nationality: { ".write": once() },
+      nationality: { ".write": dataIsEmpty() },
       nric: {
         ".write": or(
           isRole("admin"),
           and(
-            once(),
+            dataIsEmpty(),
             `data.parent().child('nationality').exists()`,
             or(
               and(
@@ -122,7 +130,11 @@ const rules = {
       // can only write teacher/parent/student
       ".read": or(self(), isRole("admin")),
       ".write": or(
-        and(self(), once(), newDataIs(["'teacher'", "'parent'", "'student'"])),
+        and(
+          self(),
+          dataIsEmpty(),
+          newDataIs(["'teacher'", "'parent'", "'student'"])
+        ),
         isRole("admin")
       ),
       ".validate": and(
@@ -135,12 +147,12 @@ const rules = {
   // map nric -> student/manager
   nric: {
     $nric: {
+      ".read": "true",
       // can write iff data not exists
       student: {
-        ".read": "true",
         ".write": or(
           and(
-            once(),
+            dataIsEmpty(),
             newDataIs([authUid()]),
             isRole("student"),
             `$nric == ${getInfo("nric")}`
@@ -149,16 +161,20 @@ const rules = {
         ),
       },
       manager: {
-        ".read": "true",
         ".write": or(
           and(
-            once(),
+            dataIsEmpty(),
             newDataIs([authUid()]),
-            or(isRole("teacher"), isRole("parent")),
-
+            or(isRole("teacher"), isRole("parent"))
             // BEFORE REGISTRATION DEADLINE
             // `root.child('contestInfo/registrationDeadline').val() > now`
           ),
+          and(
+            dataIs([authUid()]),
+            newDataIsEmpty(),
+            or(isRole("teacher"), isRole("parent"))
+          ),
+          and(dataIsEmpty(), newDataIsEmpty()),
           isRole("admin")
         ),
       },
@@ -182,15 +198,15 @@ const rules = {
         // managers can create, can read, cannot edit
         ".write": or(self(), isRole("admin")),
         amount: {
-          ".write": or(once(), isRole("admin")),
+          ".write": or(dataIsEmpty(), isRole("admin")),
           ".validate": `newData.val().matches(${regex.amount.toString()})`,
         },
         fileExtension: {
-          ".write": or(once(), isRole("admin")),
+          ".write": or(dataIsEmpty(), isRole("admin")),
           ".validate": "newData.isString()",
         },
         uniqueId: {
-          ".write": or(once(), isRole("admin")),
+          ".write": or(dataIsEmpty(), isRole("admin")),
           ".validate": "newData.isString()",
         },
         approved: {

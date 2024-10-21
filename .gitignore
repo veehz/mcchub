@@ -3,6 +3,9 @@
 # Plans
 /plans
 
+# Rules
+rules
+
 # dependencies
 /node_modules
 /.pnp
