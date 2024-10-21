@@ -5,7 +5,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
 import { ref, set, onValue, update } from "firebase/database";
-import { onAuthStateChanged } from "firebase/auth";
 
 import TextInput from "@/components/FormComponents/TextInput";
 import RadioInputList from "@/components/FormComponents/RadioInputList";
@@ -14,8 +13,9 @@ import RadioInput from "@/components/FormComponents/RadioInput";
 import nationalities from "@/data/nationalities";
 import Modal, { ModalInfo, reducer } from "@/components/Modal";
 import { useRouter } from "next/router";
-import { setOriginalNode } from "typescript";
 import regex from "@/helpers/regex";
+import { getRole, getUserDetails } from "@/services/storage";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface NRICInput {
   isMalaysian: "null" | "true" | "false";
@@ -186,63 +186,41 @@ export default function Profile() {
           setUserId(id as string);
         }
 
-        onValue(
-          ref(db, "role/" + id),
-          (snapshot) => {
-            setRole(snapshot.val());
-          },
-          {
-            onlyOnce: true,
-          }
-        );
+        getRole(id as string).then((role) => {
+          setRole(role!);
+        });
 
-        onValue(
-          ref(db, "users/" + id + "/nric"),
-          (snapshot) => {
-            const nric = snapshot.val();
-            setBoundNRIC(nric);
-            if (nric) {
-              setBound(true);
-              onValue(
-                ref(db, "users/" + id + "/nationality"),
-                (snapshot) => {
-                  setValue("nationality", snapshot.val());
-                  const userIsMalaysian = snapshot.val() === "Malaysian";
-                  setValue("isMalaysian", userIsMalaysian ? "true" : "false");
-                  if (userIsMalaysian) setValue("nric", nric);
-                  else setValue("passport", nric);
-                  setMessage([
-                    "An indentification is already bound to user account.",
-                    "If you want to change user identification, please contact us.",
-                  ]);
-                },
-                {
-                  onlyOnce: true,
-                }
-              );
+        getUserDetails(id as string).then((user) => {
+          const nric = user.nric;
+          setBoundNRIC(nric);
+          if (nric) {
+            setBound(true);
+            setValue("nationality", user.nationality);
+            const userIsMalaysian = user.nationality === "Malaysian";
+            setValue("isMalaysian", userIsMalaysian ? "true" : "false");
+            if (userIsMalaysian) setValue("nric", nric);
+            else setValue("passport", nric);
+            setMessage([
+              "An indentification is already bound to user account.",
+              "If you want to change user identification, please contact us.",
+            ]);
+          } else {
+            setBound(false);
+            setRole(user.role);
+            if (role === "student") {
+              setAllowInput(true);
+              setMessage([
+                "You can bind user identification only once.",
+                "Please check before submitting.",
+              ]);
             } else {
-              setBound(false);
-              onValue(ref(db, "role/" + id), (snapshot) => {
-                setRole(snapshot.val());
-                if (snapshot.val() === "student") {
-                  setAllowInput(true);
-                  setMessage([
-                    "You can bind user identification only once.",
-                    "Please check before submitting.",
-                  ]);
-                } else {
-                  setMessage([
-                    "You are not a student. You don't have to bind user IC number.",
-                    "Please contact us if this is a mistake.",
-                  ]);
-                }
-              });
+              setMessage([
+                "You are not a student. You don't have to bind user IC number.",
+                "Please contact us if this is a mistake.",
+              ]);
             }
-          },
-          {
-            onlyOnce: true,
           }
-        );
+        });
       }
     });
   });

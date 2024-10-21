@@ -1,10 +1,9 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
 import Link from "next/link";
-import { auth, db } from "@/firebase.js";
+import { auth } from "@/firebase.js";
 import { onAuthStateChanged, sendEmailVerification } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { onValue, ref } from "firebase/database";
 import { useRouter } from "next/router";
 
 import { ContestInfo } from "@/data/ContestInfo";
@@ -90,37 +89,44 @@ export default function Home() {
   const [payments, setPayments] = useState<any>([]);
 
   useEffect(() => {
-    getUser().then(async (user) => {
-      if (!user) router.push("/");
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/");
+        return;
+      }
 
-      getRole((role) => {
-        if (role == "admin") router.push("/admin");
-        setRole(role);
+      getRole().then((role) => {
+        setRole(role!);
 
-        getUserDetails((userDetails) => {
-          if (!userDetails.nric && role == "student") {
+        if (role == "admin") {
+          router.push("/admin");
+          return;
+        }
+
+        getUserDetails().then((userDetails) => {
+          if (!userDetails?.nric && role == "student") {
             setShowBindICButton(true);
           }
-          if (!userDetails.name) {
+          if (!userDetails?.name) {
             setShowCompleteProfileButton(true);
           }
         });
       });
 
-      getContestInfo((contestInfo) => {
+      getContestInfo().then((contestInfo) => {
         setContestInfo(contestInfo);
       });
 
-      if (!user!.emailVerified) {
+      if (!user?.emailVerified) {
         setShowVerifyEmailButton(true);
       }
 
-      getManagedStudentsCount((count) => {
+      getManagedStudentsCount().then((count) => {
         console.log(count);
         setStudentCount(count);
       });
 
-      getPayments((payments) => {
+      getPayments().then((payments) => {
         const paymentsArray = [];
         if (payments) {
           for (const paymentId in payments) {
@@ -273,7 +279,12 @@ export default function Home() {
           {/* content for third column */}
           <Card title="Important Links">
             {config.links.map((link) => (
-              <a href={link.href} target="_blank" rel="noopener" key={link.href}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener"
+                key={link.href}
+              >
                 <Button full={true}>{link.name}</Button>
               </a>
             ))}

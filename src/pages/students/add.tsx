@@ -131,19 +131,6 @@ export default function App() {
     );
   };
 
-  //   useEffect(() => {
-  //     onAuthStateChanged(auth, (user) => {
-  //       if (user) {
-  //         // fetch role
-  //         onValue(ref(db, "role/" + user.uid), (snapshot) => {
-  //           if (snapshot.val() === "student") {
-  //             router.push("/");
-  //           }
-  //         });
-  //       }
-  //     });
-  //   });
-
   return (
     <Dashboard title="Add Student">
       <div className="flex min-h-full items-center justify-center px-4 sm:px-6 lg:px-8">

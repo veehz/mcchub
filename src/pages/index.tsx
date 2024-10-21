@@ -13,7 +13,6 @@ export default function LoginLanding() {
   const router = useRouter();
   useEffect(() => {
     if (router?.query?.signout === "true") {
-      goOffline(db);
       auth.signOut();
       router.replace("/").then(() => {
         router.reload();

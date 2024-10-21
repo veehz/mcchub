@@ -4,7 +4,7 @@ import { useEffect, useReducer, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
-import { ref, child, update, onValue } from "firebase/database";
+import { ref, child, update } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 
 import InputList from "@/components/FormComponents/InputList";
@@ -15,6 +15,7 @@ import Link from "next/link";
 import Modal, { reducer, ModalInfo } from "@/components/Modal";
 import { useRouter } from "next/router";
 import config from "@/data/config";
+import { getRole, getUserDetails } from "@/services/storage";
 
 interface Profile {
   name?: string;
@@ -127,31 +128,19 @@ export default function App() {
           setUserId(id as string);
         }
 
-        onValue(
-          ref(db, "role/" + id),
-          (snapshot) => {
-            setRole(snapshot.val());
-          },
-          {
-            onlyOnce: true,
-          }
-        );
+        getRole(id as string).then((role) => {
+          setRole(role!);
+        });
 
-        onValue(
-          child(ref(db), "users/" + id),
-          (snapshot) => {
-            setOriginalDetails(snapshot.val());
-            console.log(snapshot.val());
-            for (const key in snapshot.val()) {
-              const x = key as keyof Profile;
-              setValue(x, snapshot.val()[x]);
-            }
-            setAllowInput(true);
-          },
-          {
-            onlyOnce: true,
+        getUserDetails(id as string).then((details) => {
+          setOriginalDetails(details);
+          console.log(details);
+          for (const key in details) {
+            const x = key as keyof Profile;
+            setValue(x, details[x]);
           }
-        );
+          setAllowInput(true);
+        });
       }
     });
   });

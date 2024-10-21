@@ -1,6 +1,6 @@
 import Button from "@/components/Button";
 import Dashboard from "@/components/Dashboard";
-import { useEffect, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { auth, db } from "@/firebase.js";
