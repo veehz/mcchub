@@ -249,29 +249,28 @@ const UserCard = ({
                   >
                     {studentId}{" "}
                     {nricData[studentId]?.student ? (
-                      <div>
-                        ({users[nricData[studentId].student].email},{" "}
-                        <span
-                          className="text-blue-600 font-bold hover:opacity-75 cursor-pointer"
-                          onClick={() => {
-                            const updates: {
-                              [key: string]: any;
-                            } = {};
-                            updates[`managedStudents/${userId}/${studentId}`] =
-                              null;
-                            updates[
-                              `nric/${
-                                users[nricData[studentId].student].nric
-                              }/manager`
-                            ] = null;
-                            update(ref(db), updates);
-                          }}
-                        >
-                          Unbind
-                        </span>
-                        )
-                      </div>
+                      <div>({users[nricData[studentId].student].email})</div>
                     ) : null}
+                    {
+                      <span
+                        className="text-blue-600 font-bold hover:opacity-75 cursor-pointer"
+                        onClick={() => {
+                          const updates: {
+                            [key: string]: any;
+                          } = {};
+                          updates[
+                            `nric/${
+                              users[nricData[studentId].student].nric
+                            }/manager`
+                          ] = null;
+                          updates[`managedStudents/${userId}/${studentId}`] =
+                            null;
+                          update(ref(db), updates);
+                        }}
+                      >
+                        Unbind
+                      </span>
+                    }
                   </div>
                 ))}
               </div>
