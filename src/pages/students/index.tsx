@@ -4,7 +4,11 @@ import { auth, db } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { onValue, ref } from "firebase/database";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+
+const fetchStatusOnLoad =
+  process.env["NEXT_PUBLIC_STUDENTS_FETCH_STATUS_ON_LOAD"] == "true";
 
 const StudentCard = ({
   nric,
@@ -16,7 +20,8 @@ const StudentCard = ({
   children?: React.ReactNode;
 }) => {
   const fetched = useRef<boolean>(false);
-  const [forceFetchStatus, setForceFetchStatus] = useState<boolean>(false);
+  const [forceFetchStatus, setForceFetchStatus] =
+    useState<boolean>(fetchStatusOnLoad);
 
   const [msg, setMsg] = useState<any>("");
   const [showButton, setShowButton] = useState<boolean>(false);
@@ -29,26 +34,40 @@ const StudentCard = ({
       ref(db, "nric/" + nric + "/student"),
       (snapshot) => {
         if (!snapshot.exists()) {
-          setMsg("Profile isn't bound");
+          setMsg(
+            "Profile isn't bound. " +
+              "Please ask your student/child to create a student account and " +
+              "login to their account to bind their profile."
+          );
           return;
         }
         onValue(
           ref(db, "users/" + snapshot.val()),
           (snapshot) => {
             setShowButton(true);
-            if (!snapshot.exists() || !snapshot.val().dob || !snapshot.val().name) {
-              setMsg(`Profile bound${snapshot.val().name ? ` to ${snapshot.val().name}` : ""}, Profile isn't complete`);
+            if (
+              !snapshot.exists() ||
+              !snapshot.val().dob ||
+              !snapshot.val().name
+            ) {
+              setMsg(
+                `Profile bound${
+                  snapshot.val().name ? ` to ${snapshot.val().name}` : ""
+                }, Profile isn't complete`
+              );
               return;
             }
-            setMsg(
-              `Profile complete, bound to ${snapshot.val().name}`
-            );
-          }, (error) => {
+            setMsg(`Profile complete, bound to ${snapshot.val().name}`);
+          },
+          (error) => {
             console.error(error);
           }
         );
+      },
+      (error) => {
+        console.error(error);
       }
-    )
+    );
   }, [fetchStatus, forceFetchStatus, nric]);
 
   return (
@@ -63,19 +82,26 @@ const StudentCard = ({
       </div>
       <div className="text-gray-700 text-base mb-2">{msg}</div>
       <Link href={`/students/edit?id=${nric}`}>
-        <Button full={true} className={showButton ? "" : "hidden"}>Edit Profile</Button>
+        <Button full={true} className={showButton ? "" : "hidden"}>
+          Edit Profile
+        </Button>
       </Link>
     </div>
   );
 };
 
 export default function App() {
-  const [fetchStatus, setFetchStatus] = useState<boolean>(false);
+  const [fetchStatus, setFetchStatus] = useState<boolean>(fetchStatusOnLoad);
 
   const [students, setStudents] = useState<any[]>([]);
+  const router = useRouter();
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      if(!user) return;
+      if (!user) {
+        router.push("/");
+        return;
+      }
+
       onValue(
         ref(db, "managedStudents/" + user.uid),
         (snapshot) => {
@@ -99,7 +125,7 @@ export default function App() {
           </Button>
         </Link>
         <Button
-          className="mx-4 my-2"
+          className={"mx-4 my-2" + (fetchStatus ? " hidden" : "")}
           onClick={() => setFetchStatus(true)}
         >
           Fetch All Student Status
