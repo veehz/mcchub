@@ -200,25 +200,8 @@ export default function Profile() {
             setValue("isMalaysian", userIsMalaysian ? "true" : "false");
             if (userIsMalaysian) setValue("nric", nric);
             else setValue("passport", nric);
-            setMessage([
-              "An indentification is already bound to user account.",
-              "If you want to change user identification, please contact us.",
-            ]);
           } else {
             setBound(false);
-            setRole(user.role);
-            if (role === "student") {
-              setAllowInput(true);
-              setMessage([
-                "You can bind user identification only once.",
-                "Please check before submitting.",
-              ]);
-            } else {
-              setMessage([
-                "You are not a student. You don't have to bind user IC number.",
-                "Please contact us if this is a mistake.",
-              ]);
-            }
           }
         });
       }

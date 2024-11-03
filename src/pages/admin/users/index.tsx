@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 
 import config from "@/data/config";
 import { downloadCsv, jsonToCsv } from "@/helpers/json";
+import { nric } from "@/helpers/regex";
 
 const sum = (a: number, b: number) => a + b;
 const reduceMethods: {
@@ -99,7 +100,7 @@ const UserCard = ({
       }
 
       // options
-      if (options["due"] == "true") {
+      if (options["due"]) {
         const needToPay =
           Object.keys(managedStudents).length * config.registration_fee;
         const approvedPayment = Object.keys(payments)
@@ -107,15 +108,31 @@ const UserCard = ({
           .map((key) => parseFloat(payments[key].amount))
           .reduce(sum, 0);
 
-        tfarray.push(needToPay > approvedPayment);
+        if (options["due"] == "true") {
+          tfarray.push(needToPay > approvedPayment);
+        } else if (options["due"] == "false") {
+          tfarray.push(needToPay <= approvedPayment);
+        }
       }
 
       if (options["role"]) {
-        tfarray.push(role == options["role"]);
+        tfarray.push(options["role"].split("|").indexOf(role) != -1);
       }
 
       if (options["managerof"]) {
         tfarray.push(options["managerof"] in managedStudents);
+      }
+
+      if (options["hasmanager"]) {
+        const manager = nricData[users[userId]!.nric]?.manager;
+        console.log(userId, manager);
+        if (options["hasmanager"] == "true") {
+          tfarray.push(!!manager);
+        } else if (options["hasmanager"] == "false") {
+          tfarray.push(!manager);
+        } else {
+          tfarray.push(manager == options["hasmanager"]);
+        }
       }
 
       let verdict = tfarray.reduce(
@@ -138,7 +155,7 @@ const UserCard = ({
     } else {
       setHidden(false);
     }
-  }, [searchKey, payments, managedStudents, role, userId, users]);
+  }, [searchKey, payments, managedStudents, role, userId, users, nricData]);
 
   function capitalize(str: string) {
     const words = str.split(" ");
@@ -478,6 +495,13 @@ export default function App() {
             <div>
               <span className="font-mono bg-gray-200">managerof:[nric]</span>{" "}
               shows users with [nric] as their managed student.
+            </div>
+            <div>
+              <span className="font-mono bg-gray-200">
+                hasmanager:[nric] | true | false
+              </span>{" "}
+              shows users with [nric] as their manager. If true, shows users
+              with a manager. If false, shows users without a manager.
             </div>
             <div>
               <span className="font-mono bg-gray-200">
