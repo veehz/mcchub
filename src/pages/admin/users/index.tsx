@@ -403,6 +403,22 @@ export default function App() {
   });
 
   function exportUsers() {
+    function isDue(managedStudents: any, payments: any): boolean{
+      if(!managedStudents) return false;
+      if(!payments) return Object.keys(managedStudents).length * config.registration_fee > 0;
+      const needToPay =
+        Object.keys(managedStudents).length * config.registration_fee;
+      const approvedPayment = Object.keys(payments)
+        .filter((key) => payments[key]?.approved?.status == "approved")
+        .map((key) => parseFloat(payments[key].amount))
+        .reduce(sum, 0);
+      return needToPay > approvedPayment;
+    }
+
+    function manager(nricData: any, userId: string) {
+      return nricData[users[userId]!.nric]?.manager;
+    }
+
     const fields = [
       "User ID",
       "Name",
@@ -416,9 +432,11 @@ export default function App() {
       "School",
       "Nationality",
       "Identification Number",
+      "Manager",
       "Billing Address",
       "Managed Students",
       "Payments",
+      "Payment Due",
     ];
 
     const data = Object.keys(users).map((userId) => ({
@@ -433,9 +451,11 @@ export default function App() {
       Country: users[userId]?.country,
       School: users[userId]?.school,
       "Identification Number": users[userId]?.nric,
+      Manager: manager(nricData, userId),
       "Billing Address": getBillingAddress(users[userId]?.billingAddress || {}),
       "Managed Students": Object.keys(managedStudents[userId] || {}).join(", "),
       Payments: Object.keys(payments[userId] || {}).join(", "),
+      "Payment Due": isDue(managedStudents[userId], payments[userId]).toString(),
     }));
 
     downloadCsv(jsonToCsv(data, fields), "users.csv");
