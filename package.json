@@ -17,7 +17,7 @@
     "autoprefixer": "10.4.20",
     "eslint-config-next": "14.2.13",
     "firebase": "^10.13.2",
-    "next": "14.2.13",
+    "next": "14.2.25",
     "postcss": "8.4.47",
     "react": "18.3.1",
     "react-dom": "18.3.1",
